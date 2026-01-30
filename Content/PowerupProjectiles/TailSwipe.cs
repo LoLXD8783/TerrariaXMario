@@ -10,6 +10,7 @@ using TerrariaXMario.Common.MiscEffects;
 using TerrariaXMario.Utilities.Extensions;
 
 namespace TerrariaXMario.Content.PowerupProjectiles;
+
 internal class TailSwipe : InteractiveWithObjectSpawnerTileProjectile
 {
     public override void SetStaticDefaults()
@@ -27,11 +28,16 @@ internal class TailSwipe : InteractiveWithObjectSpawnerTileProjectile
 
     public override bool PreDraw(ref Color lightColor)
     {
-        Asset<Texture2D> texture = ModContent.Request<Texture2D>(Texture + Main.player[Projectile.owner].GetModPlayerOrNull<CapEffectsPlayer>()?.currentCap);
+        Player player = Main.player[Projectile.owner];
+        Asset<Texture2D> texture = ModContent.Request<Texture2D>(Texture + player.GetModPlayerOrNull<CapEffectsPlayer>()?.currentCap);
         Rectangle destinationRect = Projectile.getRect();
         destinationRect.X -= (int)((int)Main.screenPosition.X - Projectile.width * 0.5f);
-        destinationRect.Y -= (int)((int)Main.screenPosition.Y - Projectile.height * 0.5f) - 7;
-        Main.EntitySpriteDraw(new(texture.Value, destinationRect, new(0, Projectile.frame * Projectile.height, Projectile.width, Projectile.height), lightColor, Projectile.rotation, Projectile.Size * 0.5f, Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally));
+        destinationRect.Y -= (int)((int)Main.screenPosition.Y - Projectile.height * 0.5f) - 7 * (int)player.gravDir;
+        SpriteEffects normalFlip = Projectile.spriteDirection == 1 ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+        SpriteEffects antiGravFlip = Projectile.spriteDirection == 1 ? SpriteEffects.FlipVertically | SpriteEffects.FlipHorizontally : (SpriteEffects.FlipVertically);
+
+
+        Main.EntitySpriteDraw(new(texture.Value, destinationRect, new(0, Projectile.frame * Projectile.height, Projectile.width, Projectile.height), lightColor, Projectile.rotation, Projectile.Size * 0.5f, player.gravDir == 1 ? normalFlip : antiGravFlip));
         return false;
     }
 
@@ -39,7 +45,9 @@ internal class TailSwipe : InteractiveWithObjectSpawnerTileProjectile
 
     public override void OnSpawn(IEntitySource source)
     {
-        Projectile.spriteDirection = Main.player[Projectile.owner].direction;
+        Player player = Main.player[Projectile.owner];
+
+        Projectile.spriteDirection = player.direction * (int)player.gravDir;
     }
 
     public override void AI()
@@ -52,17 +60,33 @@ internal class TailSwipe : InteractiveWithObjectSpawnerTileProjectile
             Projectile.frame = ++Projectile.frame % Main.projFrames[Projectile.type];
         }
 
-        Vector2 offset = new(0, 3);
+        Vector2 offset = new(0, 3 * player.gravDir);
 
-        if (Projectile.spriteDirection == 1)
+        if (player.gravDir == 1)
         {
-            if (Projectile.frame < 5) Projectile.Right = player.MountedCenter + offset;
-            else Projectile.Left = player.MountedCenter + offset;
+            if (Projectile.spriteDirection == 1)
+            {
+                if (Projectile.frame < 5) Projectile.Right = player.MountedCenter + offset;
+                else Projectile.Left = player.MountedCenter + offset;
+            }
+            else
+            {
+                if (Projectile.frame < 5) Projectile.Left = player.MountedCenter + offset;
+                else Projectile.Right = player.MountedCenter + offset;
+            }
         }
         else
         {
-            if (Projectile.frame < 5) Projectile.Left = player.MountedCenter + offset;
-            else Projectile.Right = player.MountedCenter + offset;
+            if (Projectile.spriteDirection == 1)
+            {
+                if (Projectile.frame < 5) Projectile.Left = player.MountedCenter + offset;
+                else Projectile.Right = player.MountedCenter + offset;
+            }
+            else
+            {
+                if (Projectile.frame < 5) Projectile.Right = player.MountedCenter + offset;
+                else Projectile.Left = player.MountedCenter + offset;
+            }
         }
     }
 

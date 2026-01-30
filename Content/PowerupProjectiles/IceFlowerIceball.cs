@@ -25,9 +25,8 @@ internal class IceFlowerIceball : FireFlowerFireball
 
     public override bool OnTileCollide(Vector2 oldVelocity)
     {
-        base.OnTileCollide(oldVelocity);
-
-        return tileCollideCount >= 2;
+        if (tileCollideCount < 2) return base.OnTileCollide(oldVelocity);
+        return true;
     }
 
     public override void ModifyHitNPC(NPC target, ref NPC.HitModifiers modifiers)
@@ -45,6 +44,7 @@ internal class IceFlowerIceball : FireFlowerFireball
     public override void OnHitNPC(NPC target, NPC.HitInfo hit, int damageDone)
     {
         SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/Misc/Freeze") { Volume = 0.4f }, target.Center);
+        target.GetGlobalNPC<IceBlockNPC>().freezePlayer = Projectile.owner;
         target.GetGlobalNPC<IceBlockNPC>().frozen = true;
     }
 }

@@ -7,6 +7,7 @@ using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace TerrariaXMario.Common.StatueForm;
+
 internal class StatueSparkle : ModProjectile // credits: Momlob
 {
     public override void SetDefaults()
@@ -19,18 +20,21 @@ internal class StatueSparkle : ModProjectile // credits: Momlob
 
     public override void OnSpawn(IEntitySource source)
     {
+        Player player = Main.player[Projectile.owner];
         Projectile.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
 
         // Smoke
         int _DustCount = 12;
         float _RandomAngleBase = Main.rand.NextFloat(MathHelper.PiOver4);
-        Vector2 _DustPos = Projectile.Center + new Vector2(0, 5);
+        Vector2 _DustPos = Projectile.Center + new Vector2(0, 5 * player.gravDir);
         for (int i = 0; i < _DustCount; i++)
         {
             Vector2 _Angle = new Vector2(1, 0).RotatedBy(MathHelper.TwoPi / _DustCount * i + _RandomAngleBase).RotatedByRandom(0.05f) * Main.rand.NextFloat(4.5f, 5f);
-            Dust.NewDustPerfect(_DustPos, ModContent.DustType<StatueDust>(), _Angle);
+            Dust dust = Dust.NewDustPerfect(_DustPos, ModContent.DustType<StatueDust>(), _Angle);
+            if (ModContent.GetModDust(dust.type) is StatueDust modDust) modDust.gravDir = (int)player.gravDir;
             Vector2 _Angle2 = new Vector2(1, 0).RotatedBy(MathHelper.TwoPi / _DustCount * i + _RandomAngleBase + MathHelper.PiOver4 / 2).RotatedByRandom(0.05f) * Main.rand.NextFloat(6.5f, 7f);
-            Dust.NewDustPerfect(_DustPos, ModContent.DustType<StatueDust>(), _Angle2);
+            Dust dust2 = Dust.NewDustPerfect(_DustPos, ModContent.DustType<StatueDust>(), _Angle2);
+            if (ModContent.GetModDust(dust2.type) is StatueDust modDust2) modDust2.gravDir = (int)player.gravDir;
         }
     }
     public override void AI()

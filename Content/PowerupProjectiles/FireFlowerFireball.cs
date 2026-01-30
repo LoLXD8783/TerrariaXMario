@@ -42,7 +42,7 @@ internal class FireFlowerFireball : MetaballProjectile, IDrawToDustMetaballsTarg
 
     public override bool OnTileCollide(Vector2 oldVelocity)
     {
-        if (Projectile.velocity.Y != oldVelocity.Y && Math.Abs(oldVelocity.Y) > 1f)
+        if (Projectile.velocity.Y != oldVelocity.Y && Projectile.oldVelocity.Y > 0)
         {
             Projectile.velocity.Y = bounceSpeed;
             tileCollideCount++;
@@ -55,9 +55,11 @@ internal class FireFlowerFireball : MetaballProjectile, IDrawToDustMetaballsTarg
                     dust.scale = Main.rand.NextFloat(0.7f, 0.8f);
                 }
             }
+
+            return false;
         }
 
-        return false;
+        return true;
     }
 
     public override void AI()

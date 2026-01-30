@@ -20,9 +20,14 @@ public class IceBlockNPC : GlobalNPC
     private int frozenTimer;
 
     private bool defaultNoGravity;
+    private bool defaultNoTileCollide;
 
     internal Rectangle iceBlockRect = Rectangle.Empty;
     internal bool thrown;
+
+    internal int? freezePlayer;
+
+    internal int Pow => freezePlayer == null ? 0 : Main.player[(int)freezePlayer].GetModPlayerOrNull<CapEffectsPlayer>()?.StatPower ?? 0;
 
     private readonly Asset<Texture2D> iceBlockTexture = ModContent.Request<Texture2D>($"{nameof(TerrariaXMario)}/Common/MiscEffects/IceBlock");
 
@@ -32,7 +37,10 @@ public class IceBlockNPC : GlobalNPC
 
         frozen = false;
         thrown = false;
+        freezePlayer = null;
         frozenTimer = 0;
+        npc.noGravity = defaultNoGravity;
+        npc.noTileCollide = defaultNoTileCollide;
 
         for (int i = 0; i < 4; i++)
         {
@@ -47,17 +55,14 @@ public class IceBlockNPC : GlobalNPC
         base.SetDefaults(entity);
 
         defaultNoGravity = entity.noGravity;
+        defaultNoTileCollide = entity.noTileCollide;
     }
 
     public override bool PreAI(NPC npc)
     {
         if (frozenTimer <= 0)
         {
-            if (frozen)
-            {
-                npc.noGravity = defaultNoGravity;
-                KillIceBlock(npc);
-            }
+            if (frozen) KillIceBlock(npc);
 
             double factor = npc.frame.Width + npc.frame.Height;
             frozenTimer = 60 * (int)(-4.5f * (Math.Cos(0.00335f * Math.PI * factor + Math.PI) - 1.225f));
@@ -71,27 +76,29 @@ public class IceBlockNPC : GlobalNPC
             {
                 npc.velocity.Y += Player.defaultGravity;
                 npc.noGravity = false;
+                npc.noTileCollide = false;
 
                 foreach (NPC target in Main.ActiveNPCs)
                 {
                     IceBlockNPC? globalNPC = target.GetGlobalNPCOrNull<IceBlockNPC>();
-                    if (target != npc && globalNPC != null && globalNPC.frozen && iceBlockRect.Intersects(globalNPC.iceBlockRect))
+                    if (target != npc && globalNPC != null && iceBlockRect.Intersects(globalNPC.iceBlockRect))
                     {
-                        globalNPC.KillIceBlock(target);
-                        target.StrikeInstantKill();
+                        if (globalNPC.frozen) globalNPC.KillIceBlock(target);
+                        target.StrikeNPC(new() { Damage = Pow / 4 });
                     }
                 }
 
                 if (npc.velocity.X == 0)
                 {
                     KillIceBlock(npc);
-                    npc.StrikeInstantKill();
+                    npc.StrikeNPC(new() { Damage = Pow });
                 }
             }
             else
             {
                 npc.velocity = Vector2.Zero;
                 npc.noGravity = true;
+                npc.noTileCollide = false;
             }
 
             frozenTimer--;
@@ -148,12 +155,6 @@ public class IceBlockNPC : GlobalNPC
     {
         base.PostDraw(npc, spriteBatch, screenPos, drawColor);
 
-        if (!frozen)
-        {
-            this.iceBlockRect = Rectangle.Empty;
-            return;
-        }
-
         Vector2 size = npc.frame.Size() * npc.scale;
         Vector2 position = new Vector2(npc.Bottom.X - size.X * 0.5f, npc.Bottom.Y - size.Y + 2) - screenPos;
 
@@ -163,6 +164,8 @@ public class IceBlockNPC : GlobalNPC
         this.iceBlockRect = iceBlockRect;
         this.iceBlockRect.X += (int)screenPos.X;
         this.iceBlockRect.Y += (int)screenPos.Y;
+
+        if (!frozen) return;
 
         Color baseColor = Color.White * 0.5f;
 
@@ -212,10 +215,12 @@ public class IceBlockNPC : GlobalNPC
     public override void SaveData(NPC npc, TagCompound tag)
     {
         tag[nameof(defaultNoGravity)] = defaultNoGravity;
+        tag[nameof(defaultNoTileCollide)] = defaultNoTileCollide;
     }
 
     public override void LoadData(NPC npc, TagCompound tag)
     {
         if (tag.ContainsKey(nameof(defaultNoGravity))) defaultNoGravity = tag.GetBool(nameof(defaultNoGravity));
+        if (tag.ContainsKey(nameof(defaultNoTileCollide))) defaultNoTileCollide = tag.GetBool(nameof(defaultNoTileCollide));
     }
 }

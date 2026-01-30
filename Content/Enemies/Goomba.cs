@@ -1,9 +1,12 @@
 ﻿using System;
 using Terraria;
+using Terraria.GameContent.Bestiary;
+using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Utilities;
 
-namespace TerrariaXMario.Content.NPCs;
+namespace TerrariaXMario.Content.Enemies;
+
 internal class Goomba : ModNPC
 {
     private enum State
@@ -22,6 +25,15 @@ internal class Goomba : ModNPC
     public override void SetStaticDefaults()
     {
         Main.npcFrameCount[NPC.type] = 31;
+        NPCID.Sets.NPCBestiaryDrawModifiers drawModifiers = new()
+        {
+            Velocity = 1f,
+            Direction = -1
+        };
+
+        NPCID.Sets.NPCBestiaryDrawOffset.Add(Type, drawModifiers);
+        ContentSamples.NpcBestiaryRarityStars[Type] = 1;
+
     }
 
     public override void SetDefaults()
@@ -102,6 +114,14 @@ internal class Goomba : ModNPC
         int gore = Mod.Find<ModGore>($"GoombaGore").Type;
         gore = Gore.NewGore(NPC.GetSource_Death(), NPC.Center, NPC.velocity, gore);
         Main.gore[gore].timeLeft = 0;
+    }
+
+    public override void SetBestiary(BestiaryDatabase database, BestiaryEntry bestiaryEntry)
+    {
+        bestiaryEntry.Info.AddRange([
+            BestiaryDatabaseNPCsPopulator.CommonTags.SpawnConditions.Biomes.Surface,
+                new FlavorTextBestiaryInfoElement($"Mods.{nameof(TerrariaXMario)}.NPCs.{nameof(Goomba)}.Bestiary"),
+        ]);
     }
 
     private void Chill()

@@ -22,7 +22,7 @@ internal class StompHitbox : ModProjectile
     {
         if (player.GetModPlayerOrNull<CapEffectsPlayer>()?.statueForm ?? false) return;
 
-        player.velocity.Y = player.controlJump ? -8.5f : -5;
+        player.velocity.Y = (player.controlJump ? -8.5f : -5) * player.gravDir;
 
         stompCooldown = 5;
         stompCount++;
@@ -53,7 +53,7 @@ internal class StompHitbox : ModProjectile
         if (stompCooldown > 0) stompCooldown--;
         else if (targetIndex != null) targetIndex = null;
 
-        Projectile.position = player.BottomLeft;
+        Projectile.position = player.gravDir == 1 ? player.BottomLeft : player.TopLeft - new Vector2(0, 4);
 
         if (groundPound && groundPoundCooldown > 15 && !player.controlDown)
         {
@@ -78,19 +78,19 @@ internal class StompHitbox : ModProjectile
 
             if (groundPoundCooldown <= 20)
             {
-                player.fullRotationOrigin = new Vector2(player.Size.X * 0.5f, player.Size.Y * 0.75f);
-                player.velocity = new(0, 0.1f);
+                player.fullRotationOrigin = new Vector2(player.Size.X * 0.5f, player.Size.Y * (player.gravDir == 1 ? 0.75f : 0.25f));
+                player.velocity = new(0, 0.1f * player.gravDir);
 
                 if (modPlayer.CurrentPowerup is not TanookiSuit)
                 {
-                    if (groundPoundCooldown <= 5) player.fullRotation = player.direction * (groundPoundCooldown * MathHelper.Pi * 0.2f);
-                    else if (groundPoundCooldown <= 15) player.fullRotation = player.direction * (MathHelper.Pi + (groundPoundCooldown - 5) * MathHelper.Pi * 0.1f);
+                    if (groundPoundCooldown <= 5) player.fullRotation = player.direction * player.gravDir * (groundPoundCooldown * MathHelper.Pi * 0.2f);
+                    else if (groundPoundCooldown <= 15) player.fullRotation = player.direction * player.gravDir * (MathHelper.Pi + (groundPoundCooldown - 5) * MathHelper.Pi * 0.1f);
                 }
             }
             else if (player.controlDown)
             {
                 player.maxFallSpeed = 50f;
-                player.velocity.Y = player.maxFallSpeed;
+                player.velocity.Y = player.maxFallSpeed * player.gravDir;
 
                 foreach (Point point in modPlayer.HitObjectSpawnerBlocks(1, true) ?? [])
                 {
@@ -115,12 +115,13 @@ internal class StompHitbox : ModProjectile
 
         if (!groundPound)
         {
-            Stomp(Main.player[Projectile.owner]);
+            Player player = Main.player[Projectile.owner];
+            Stomp(player);
 
             for (int i = -1; i < 2; i++)
             {
                 if (i == 0) continue;
-                Dust.NewDustPerfect(target.Top, ModContent.DustType<ImpactDust>(), new Vector2(Math.Sign(i), Main.rand.NextFloat(-0.5f, 0.5f)));
+                Dust.NewDustPerfect(player.gravDir == 1 ? player.Bottom : player.Top, ModContent.DustType<ImpactDust>(), new Vector2(Math.Sign(i), player.gravDir * Main.rand.NextFloat(-0.5f, 0.5f)));
             }
 
             return;
@@ -155,7 +156,7 @@ internal class StompHitbox : ModProjectile
         for (int i = -2; i < 3; i++)
         {
             if (i == 0) continue;
-            Dust.NewDustPerfect(player.Bottom, ModContent.DustType<ImpactDust>(), new Vector2(1.5f * Math.Sign(i), Main.rand.NextFloat(-1f, -0.5f)));
+            Dust.NewDustPerfect(player.gravDir == 1 ? player.Bottom : player.Top, ModContent.DustType<ImpactDust>(), new Vector2(1.5f * Math.Sign(i), player.gravDir * Main.rand.NextFloat(-1f, -0.5f)));
         }
     }
 }

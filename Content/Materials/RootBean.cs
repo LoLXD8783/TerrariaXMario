@@ -4,7 +4,7 @@ using TerrariaXMario.Common.SpawnableObject;
 
 namespace TerrariaXMario.Content.Materials;
 
-internal class StemBean : ModItem, ISpawnableObject
+internal class RootBean : ModItem, ISpawnableObject
 {
     SpawnRarity ISpawnableObject.SpawnRarity { get; set; } = SpawnRarity.Epic;
 

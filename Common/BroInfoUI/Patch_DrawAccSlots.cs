@@ -21,6 +21,8 @@ internal sealed class Patch_DrawAccSlots : BasePatch
 
         if (modded && self.Get(slot) is GearSlot) return orig(self, skip, modded, slot, color);
 
+        if (AccessorySlotLoader.DefenseIconPosition == Vector2.Zero) return orig(self, skip, modded, slot, color);
+
         return false;
     }
 }

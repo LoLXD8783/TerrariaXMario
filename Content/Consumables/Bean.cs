@@ -34,14 +34,14 @@ internal class BeanDefenseDown : ModItem
 
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 2, -1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 2, -5);
         return true;
     }
 
     public override void AddRecipes()
     {
         Recipe.Create(Item.type)
-            .AddIngredient(ModContent.ItemType<StemBean>())
+            .AddIngredient(ModContent.ItemType<RootBean>())
             .Register();
     }
 }
@@ -52,7 +52,7 @@ internal class BeanDefense : BeanDefenseDown, ISpawnableObject
 
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 2, 1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 2, 5);
         return true;
     }
 }
@@ -67,7 +67,7 @@ internal class BeanHPDown : BeanDefenseDown
 
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 1, -1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 1, -5);
         return true;
     }
 }
@@ -77,7 +77,7 @@ internal class BeanHP : BeanHPDown, ISpawnableObject
     SpawnRarity ISpawnableObject.SpawnRarity { get; set; } = SpawnRarity.Rare;
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 1, 1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 1, 5);
         return true;
     }
 }
@@ -92,7 +92,7 @@ internal class BeanSPDown : BeanDefenseDown
 
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 0, -1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 0, -5);
         return true;
     }
 }
@@ -102,7 +102,7 @@ internal class BeanSP : BeanSPDown, ISpawnableObject
     SpawnRarity ISpawnableObject.SpawnRarity { get; set; } = SpawnRarity.Rare;
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 0, 1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 0, 5);
         return true;
     }
 }
@@ -117,7 +117,7 @@ internal class BeanPowDown : BeanDefenseDown
 
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 3, -1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 3, -5);
         return true;
     }
 }
@@ -127,7 +127,7 @@ internal class BeanPow : BeanPowDown, ISpawnableObject
     SpawnRarity ISpawnableObject.SpawnRarity { get; set; } = SpawnRarity.Rare;
     public override bool? UseItem(Player player)
     {
-        CapEffectsPlayer.IncreaseMaxStat(player, 3, 1);
+        CapEffectsPlayer.IncreaseMaxStat(player, 3, 5);
         return true;
     }
 }

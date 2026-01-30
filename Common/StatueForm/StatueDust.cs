@@ -6,6 +6,7 @@ using Terraria.ModLoader;
 namespace TerrariaXMario.Common.StatueForm;
 internal class StatueDust : ModDust // credits: Momlob
 {
+    internal int gravDir = 1;
     public override void OnSpawn(Dust dust)
     {
         dust.rotation = Main.rand.NextFloat(MathHelper.TwoPi);
@@ -17,7 +18,7 @@ internal class StatueDust : ModDust // credits: Momlob
     {
         dust.position += dust.velocity;
         dust.velocity *= 0.85f;
-        dust.velocity.Y -= 0.2f;
+        dust.velocity.Y -= 0.2f * gravDir;
 
         dust.frame = new Rectangle(0, (int)Math.Clamp(Math.Floor(2 - dust.scale * 2), 0, 2) * 22, 22, 22);
 

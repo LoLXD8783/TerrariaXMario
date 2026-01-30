@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Linq;
 using Terraria;
-using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaXMario.Common.CapEffects;
 using TerrariaXMario.Content.Caps;
@@ -25,8 +24,8 @@ internal class FrogSuit : Powerup
     {
         CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
 
-        player.dashType = DashID.ShieldOfCthulhu;
-        player.jumpSpeedBoost += 0.75f;
+        player.frogLegJumpBoost = true;
+        player.autoJump = true;
         player.iceSkate = true;
         player.accDivingHelm = true;
         player.ignoreWater = true;
@@ -36,11 +35,8 @@ internal class FrogSuit : Powerup
 
         if (modPlayer.frogSwimming)
         {
+            player.gravControl = player.gravControl2 = false;
             modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = null;
-        }
-        else if (player.timeSinceLastDashStarted == 1)
-        {
-            modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = "Running";
         }
 
         if (player.mount.Active) modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = "Running";
@@ -48,9 +44,13 @@ internal class FrogSuit : Powerup
 
         if (modPlayer.frogSwimming)
         {
-            Vector2 velocity = new Vector2((player.controlLeft ? -1 : 0) + (player.controlRight ? 1 : 0), ((player.controlUp || player.controlJump ? -1 : 0) + (player.controlDown ? 1 : 0)) * player.gravDir).SafeNormalize(Vector2.Zero) * 5f;
+            if (modPlayer.dashCooldown == 0)
+            {
+                Vector2 velocity = new Vector2((player.controlLeft ? -1 : 0) + (player.controlRight ? 1 : 0), ((player.controlUp || player.controlJump ? -1 : 0) + (player.controlDown ? 1 : 0)) * player.gravDir).SafeNormalize(Vector2.Zero) * 5f;
 
-            player.velocity = velocity == Vector2.Zero ? Vector2.Lerp(player.velocity, velocity, 0.05f) : velocity;
+                player.velocity = velocity == Vector2.Zero ? Vector2.Lerp(player.velocity, velocity, 0.05f) : velocity;
+            }
+
             player.gravity = 0;
         }
 
@@ -58,6 +58,23 @@ internal class FrogSuit : Powerup
         {
             modPlayer.frogSwimFrame = 0;
             player.gravity = Player.defaultGravity;
+        }
+    }
+
+    internal override void OnRightClick(Player player)
+    {
+        CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
+
+        if (modPlayer != null && modPlayer.dashCooldown == 0)
+        {
+            modPlayer.PowerupCharge -= 50;
+            modPlayer.dashCooldown = 30;
+            Vector2 dashVelocity = player.MountedCenter.DirectionTo(Main.MouseWorld) * 12;
+            dashVelocity.X = MathHelper.Clamp(dashVelocity.X, -10, 10);
+            dashVelocity.Y = MathHelper.Clamp(dashVelocity.Y, -10, 10);
+            player.velocity = dashVelocity;
+
+            if (!modPlayer.frogSwimming) modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = "Running";
         }
     }
 }

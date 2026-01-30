@@ -5,6 +5,7 @@ using TerrariaXMario.Core;
 using TerrariaXMario.Utilities.Extensions;
 
 namespace TerrariaXMario.Common.CapEffects;
+
 internal sealed class Patch_WallKick : BasePatch
 {
     internal override void Patch(Mod mod)
@@ -22,6 +23,12 @@ internal sealed class Patch_WallKick : BasePatch
 
         c.Remove();
         c.EmitLdarg(0);
-        c.EmitDelegate((Player player) => (player.GetModPlayerOrNull<CapEffectsPlayer>()?.CanDoCapEffects ?? false) ? 5 : 3);
+        c.EmitDelegate((Player player) =>
+        {
+            CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
+
+            if (modPlayer?.CanDoCapEffects ?? false) return 5;
+            return 3;
+        });
     }
 }

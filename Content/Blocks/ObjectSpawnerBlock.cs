@@ -62,7 +62,7 @@ internal class ObjectSpawnerBlockEntity : ModTileEntity
 
         if (ShouldShowEmpty)
         {
-            if (ticksSinceEmptied >= Main.nightLength * 0.5f)
+            if (ticksSinceEmptied >= Main.nightLength)
             {
                 WasPreviouslyStruck = false;
                 ticksSinceEmptied = 0;
@@ -136,7 +136,7 @@ internal class ObjectSpawnerBlockTile : ModTile
         TerrariaXMario.GetTileEntityOrNull(i, j)?.tileInternalName = GetType().Name;
     }
 
-    public override bool CanKillTile(int i, int j, ref bool blockDamaged) => TerrariaXMario.GetTileEntityOrNull(i, j)?.spawnContents.Length == 0;
+    public override bool CanKillTile(int i, int j, ref bool blockDamaged) => !TerrariaXMario.GetTileEntityOrNull(i, j)?.ShouldShowEmpty ?? true;
 
     public override void KillMultiTile(int i, int j, int frameX, int frameY)
     {
@@ -151,7 +151,7 @@ internal class ObjectSpawnerBlockTile : ModTile
 
         Vector2 worldPosition = (entity.Position.ToVector2() + new Vector2(11, 8)).ToWorldCoordinates() + new Vector2(-6, 6);
 
-        spriteBatch.Draw(ModContent.Request<Texture2D>($"{TerrariaXMario.Textures}/Toad").Value, worldPosition - Main.screenPosition, new Rectangle(160, 56 * ((int)(Main.GameUpdateCount * 0.25f) % 15), 80, 56), Color.White);
+        spriteBatch.Draw(ModContent.Request<Texture2D>($"{TerrariaXMario.Textures}/Toad").Value, worldPosition - Main.screenPosition, new Rectangle(160, 56 * ((int)(Main.GameUpdateCount * 0.25f) % 15), 80, 56), Lighting.GetColor(i, j));
     }
 
     public override void SetDrawPositions(int i, int j, ref int width, ref int offsetY, ref int height, ref short tileFrameX, ref short tileFrameY)

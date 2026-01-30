@@ -1,5 +1,5 @@
-[h1]Mario & Luigi: Crossover[/h1]
-[h3]Explore Terraria worlds as your favorite Goomba-stomping plumber duo[/h3]
+[h1]Mario and Luigi: Escapade[/h1]
+[h3]The definitive Terraria x Mario experience[/h3]
 
 
 [h1]Prelude[/h1]
@@ -13,7 +13,7 @@ Momlob - The bulk of content and UI sprites
 Exslueterra - A handful of sprites and sprite tweaks
 Lolxd87 - Anything graphics-related, as well as just being incredibly supportful
 Lugnut - Voice acting
-Hencko - The owner of this mod's 1.3 version
+Hencko - The owner of this mod's 1.3 version. None of this would be happening without you
 
 [h1]Future plans[/h1]
 This build mainly serves to establish important systems, such as the loadout, powerups, and transformations. In the future, expect lots of Mario representation, including enemies, Powerups, items, and even entire subworlds to explore!

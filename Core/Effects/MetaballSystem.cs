@@ -122,8 +122,8 @@ internal class MetaballSystem2 : ModSystem
                 previousType = dust.type;
             }
             FlushToMainTarget(false);
-            void BeginSBPerDustType() => sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.None, Main.Rasterizer);
-            void BeginToMainTarget() => sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, Main.Rasterizer, shader);
+            void BeginSBPerDustType() => sb.Begin(SpriteSortMode.Deferred, BlendState.Additive, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone);
+            void BeginToMainTarget() => sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, shader);
             void FlushToMainTarget(bool continuing)
             {
                 sb.End();
@@ -163,7 +163,7 @@ internal class MetaballSystem2 : ModSystem
         if (mainPixellationTarget == null) return;
 
         var sb = Main.spriteBatch;
-        sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, Main.Rasterizer, null, Main.GameViewMatrix.TransformationMatrix);
+        sb.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullNone, null, Main.GameViewMatrix.TransformationMatrix);
 
         Vector2 position = Main.screenPosition - previousScreenPosition;
         Vector2 scale = Main.ScreenSize.ToVector2() / mainPixellationTarget.Size();

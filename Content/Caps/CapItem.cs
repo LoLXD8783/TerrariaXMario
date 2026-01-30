@@ -83,27 +83,27 @@ internal abstract class CapItem : ModItem, ISpawnableObject
     public override void UpdateAccessory(Player player, bool hideVisual)
     {
         CapEffectsPlayer? capEffectsPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
-        player.lifeRegen = 0;
-        player.lifeRegenTime = 0;
-        player.accFlipper = true;
-        player.noKnockback = true;
-        player.statDefense += capEffectsPlayer?.StatDefense ?? 0;
-        player.statLifeMax2 += capEffectsPlayer?.StatHP ?? 0;
-
-        if (capEffectsPlayer?.shouldRemovePowerup ?? false) player.immune = true;
-
-        if (capEffectsPlayer?.flightState != FlightState.None) player.noFallDmg = true;
-
-        if (Name == "Luigi") player.jumpSpeedBoost = 0.5f;
-
 
         player.GetModPlayerOrNull<CapEffectsPlayer>()?.currentCap = Name;
 
         if (capEffectsPlayer == null) return;
 
+        if (Name == "Luigi" && !player.IsOnGroundPrecise()) player.gravity = 0.2f + (capEffectsPlayer.currentJump is Jump.Double or Jump.Triple ? 0.05f : 0);
+
         if (!capEffectsPlayer.GroundPounding && capEffectsPlayer.currentPowerupType != ModContent.GetInstance<FrogSuit>().Type) player.spikedBoots = 1;
 
         capEffectsPlayer.CurrentPowerup?.UpdateConsumed(player);
+
+        if (!player.GetModPlayerOrNull<BroInfoPlayer>()?.ShowBroInfo ?? true) return;
+
+        if (capEffectsPlayer.slippyTimer > 0 && player.IsOnGroundPrecise()) player.slippy = true;
+
+        player.lifeRegen = 0;
+        player.lifeRegenTime = 0;
+        if (!capEffectsPlayer?.GroundPounding ?? true) player.accFlipper = true;
+        player.noKnockback = true;
+        player.statDefense += capEffectsPlayer?.StatDefense ?? 0;
+        player.statLifeMax2 += capEffectsPlayer?.StatHP ?? 0;
     }
 
     public override void UpdateVisibleAccessory(Player player, bool hideVisual)

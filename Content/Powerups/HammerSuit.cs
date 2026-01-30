@@ -26,7 +26,7 @@ internal class HammerSuitProjectile : PowerupProjectile
 {
     internal override int? PowerupType => ModContent.GetInstance<HammerSuit>().Type;
     internal override string[] Caps => [nameof(Mario), nameof(Luigi)];
-    internal override bool CanSpawn(Player player) => player.ZoneDungeon || player.ZoneUndergroundDesert || player.ZoneUndergroundDesert;
+    internal override bool CanSpawn(Player player) => player.ZoneDungeon || player.ZoneDesert || player.ZoneUndergroundDesert;
 }
 
 internal class HammerSuitItem : PowerupItem

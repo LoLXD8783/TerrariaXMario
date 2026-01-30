@@ -1,7 +1,7 @@
-# Mario & Luigi: Crossover
-### Explore Terraria worlds as your favorite Goomba-stomping plumber duo
+# Mario and Luigi: Escapade
+### The definitive Terraria x Mario experience!
 
 # Portal
 - **Discord Server**: https://discord.gg/st553Phdkr
 - **Terraria Community Forum Thread**: Coming soon
-- **Wiki**: Will be made after the mod's full release
+- **Wiki**: Coming soon

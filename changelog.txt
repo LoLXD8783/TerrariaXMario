@@ -1,2 +1,57 @@
-﻿2026.0.1.1
-- ✔️ Fixed player stats not persisting
+﻿2026.1.0.0
+
+Additions
+- ✔️ Added Root Beans to boss loot pools
+- ✔️ Added Thin Wear
+- ✔️ Added Picnic Wear
+- ✔️ Added Leisure Wear
+- ✔️ Added Fighter Wear
+- ✔️ Added Heart Wear
+- ✔️ Added Brawny Wear
+- ✔️ Added Grown-Up Wear
+- ✔️ Added Hero Wear
+- ✔️ Added Balm Wear
+- ✔️ Added Muscle Wear
+- ✔️ Added Koopa Wear
+- ✔️ Added Master Wear
+- ✔️ Added King Wear
+- ✔️ Added Star Wear
+- ✔️ Added D-Star Wear
+- ✔️ Added A-OK Wear
+- ✔️ Added Toad Town NPC
+
+Removals
+- ✔️ Removed levelling system in favor of gear-based stat boosts	
+- ✔️ Removed player immunity during "Powerup grace" state
+
+Tweaks
+- ✔️ Renamed the mod from Mario & Luigi: Crossover to Mario and Luigi: Escapade
+- ✔️ Renamed Stem Bean to Root Bean
+- ✔️ Increased bean stat values from 1 to 5
+- ✔️ Increased Ground Pound jump speed
+- ✔️ Fall damage is now negated at all times when using a flight Powerup, not just when gliding
+- ✔️ Increased Powerup Charge depleted from Tail Swipes from 30 to 35
+- ✔️ Doubled ? Block cooldown time
+- ✔️ Reduced the chance of spawning a Powerup to 20% normally and 2% if you have it equipped or reserved
+- ✔️ Hammer Suits can now spawn in Surface Deserts
+- ✔️ ? Blocks can not be mined during their cooldown as a preventative measure against instant cooldown resets
+- ✔️ Ice Blocks no longer instantly kill enemies, the damage is now determined by the Pow value of the user who's iceball hit the enemy
+- ✔️ Added minimum values to Power (5) and SP (20)
+- ✔️ The player can no longer switch gravity while swimming with a Frog Suit, since the Up key is used for maneuvering during this state
+- ✔️ The Frog Suit now provides a higher jump speed and auto-jump, similar to the Frog Leg accessory
+- ✔️ The Frog Suit dash is now a proper speed boost, which propels the player towards their mouse cursor upon right clicking
+- ✔️ Luigi now has a higher, floatier jump, and is more slippery
+- ✔️ Paintings now sell for 20 silver
+
+Fixes
+- ✔️ Fixed SP bar not appearing properly with values over 100
+- ✔️ Fixed sleeping rotation
+- ✔️ Fixed frog swimming state persisting after dying and respawning
+- ✔️ Toad now matches the proper light level and doesn't just glow constantly
+- ✔️ Defense and Pow icons now draw properly when restarting the game with the gear loadout on without having to switch loadouts to refresh drawing
+- ✔️ Stomp hitboxes no longer persist when the player dies in midair
+- ✔️ Enemies that normally don't collide with tiles now do so when encased in an ice block
+- ✔️ Players can no longer "swim up" while ground pounding
+- ✔️ Fire Flower and Ice Flower projectiles can no longer go through blocks when fired straight up
+- ✔️ Improved player grounded check, adding support for water walking and removing an edge case where standing on the very left edge of a block would be considered airborne
+- ✔️ All Cap and Powerup visuals and interactions now appear and work properly in anti-gravity

@@ -17,7 +17,7 @@ internal class MischievousActivitiesTile : ModTile
         TileObjectData.newTile.CopyFrom(TileObjectData.Style3x3Wall);
         TileObjectData.addTile(Type);
 
-        AddMapEntry(Color.HotPink);
+        AddMapEntry(new Color(150, 107, 75));
     }
 }
 
@@ -29,5 +29,6 @@ internal class MischievousActivities : ModItem
 
         Item.width = 24;
         Item.height = 24;
+        Item.value = Item.sellPrice(silver: 20);
     }
 }

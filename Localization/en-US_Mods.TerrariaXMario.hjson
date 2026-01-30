@@ -10,7 +10,7 @@ Items: {
 	}
 
 	QuestionBlock: {
-		DisplayName: Question Block
+		DisplayName: ? Block
 		Tooltip: Can contain certain special objects
 	}
 
@@ -41,7 +41,7 @@ Items: {
 
 	EdibleMushroomBad: {
 		DisplayName: Poison Mushroom
-		Tooltip: Why would anyone voluntarily eat this?
+		Tooltip: Why would anyone want to eat this?
 	}
 
 	RefreshingHerb: {
@@ -55,20 +55,12 @@ Items: {
 
 	RevivingMushroom1: {
 		DisplayName: 1UP Mushroom
-		Tooltip:
-			'''
-			Prevents a bro from dying if kept in inventory
-			Grants half HP upon consumption
-			'''
+		Tooltip: Prevents a bro from dying if kept in inventory, giving them half HP
 	}
 
 	RevivingMushroom2: {
 		DisplayName: 1UP Deluxe
-		Tooltip:
-			'''
-			Prevents a bro from dying if kept in inventory
-			Grants full HP upon consumption
-			'''
+		Tooltip: Prevents a bro from dying if kept in inventory, giving them full HP
 	}
 
 	StarCandy1: {
@@ -188,52 +180,47 @@ Items: {
 
 	BeanDefense: {
 		DisplayName: Tough Bean
-		Tooltip: Permanently increases defense by 1
+		Tooltip: Permanently increases defense
 	}
 
 	BeanDefenseDown: {
 		DisplayName: Brittle Bean
-		Tooltip: Permanently decreases defense by 1
+		Tooltip: Permanently decreases defense
 	}
 
 	BeanHP: {
 		DisplayName: Healthy Bean
-		Tooltip: Permanently increases life by 1
+		Tooltip: Permanently increases life
 	}
 
 	BeanHPDown: {
 		DisplayName: Sickly Bean
-		Tooltip: Permanently decreases life by 1
+		Tooltip: Permanently decreases life
 	}
 
 	BeanPow: {
 		DisplayName: Strong Bean
-		Tooltip: Permanently increases Pow by 1
+		Tooltip: Permanently increases Pow
 	}
 
 	BeanPowDown: {
 		DisplayName: Weak Bean
-		Tooltip: Permanently decreases Pow by 1
+		Tooltip: Permanently decreases Pow
 	}
 
 	BeanSP: {
 		DisplayName: Special Bean
-		Tooltip: Permanently increases SP by 1
+		Tooltip: Permanently increases SP
 	}
 
 	BeanSPDown: {
 		DisplayName: Ordinary Bean
-		Tooltip: Permanently decreases SP by 1
+		Tooltip: Permanently decreases SP
 	}
 
 	BooBiscuit: {
 		DisplayName: Boo Biscuit
 		Tooltip: Turns you invisible for a short time
-	}
-
-	StemBean: {
-		DisplayName: Stem Bean
-		Tooltip: ""
 	}
 
 	BoomerangFlowerItem: {
@@ -270,9 +257,145 @@ Items: {
 		DisplayName: Reserved Tanooki Suit
 		Tooltip: Summons a Tanooki Suit
 	}
+
+	ThinWear: {
+		DisplayName: Thin Wear
+		Tooltip: ""
+	}
+
+	AOKWear: {
+		DisplayName: A-OK Wear
+		Tooltip: ""
+	}
+
+	BalmWear: {
+		DisplayName: Balm Wear
+		Tooltip: ""
+	}
+
+	BrawnyWear: {
+		DisplayName: Brawny Wear
+		Tooltip: ""
+	}
+
+	DStarWear: {
+		DisplayName: D-Star Wear
+		Tooltip: ""
+	}
+
+	FighterWear: {
+		DisplayName: Fighter Wear
+		Tooltip: ""
+	}
+
+	GrownUpWear: {
+		DisplayName: Grown-Up Wear
+		Tooltip: ""
+	}
+
+	HeartWear: {
+		DisplayName: Heart Wear
+		Tooltip: ""
+	}
+
+	HeroWear: {
+		DisplayName: Hero Wear
+		Tooltip: ""
+	}
+
+	KingWear: {
+		DisplayName: King Wear
+		Tooltip: ""
+	}
+
+	KoopaWear: {
+		DisplayName: Koopa Wear
+		Tooltip: ""
+	}
+
+	LeisureWear: {
+		DisplayName: Leisure Wear
+		Tooltip: ""
+	}
+
+	MasterWear: {
+		DisplayName: Master Wear
+		Tooltip: ""
+	}
+
+	MuscleWear: {
+		DisplayName: Muscle Wear
+		Tooltip: ""
+	}
+
+	PicnicWear: {
+		DisplayName: Picnic Wear
+		Tooltip: ""
+	}
+
+	StarWear: {
+		DisplayName: Star Wear
+		Tooltip: ""
+	}
+
+	RootBean: {
+		DisplayName: Root Bean
+		Tooltip: ""
+	}
 }
 
-NPCs.Goomba.DisplayName: Goomba
+NPCs: {
+	Goomba: {
+		DisplayName: Goomba
+		Bestiary: A weak, two-legged mushroom creature. One of Bowser's most loyal minions.
+	}
+
+	Toad: {
+		DisplayName: Toad
+
+		Shop: {
+			Overalls: Overalls
+			Socks: Socks
+			Boots: Boots
+			Gloves: Gloves
+			Badge: Badges
+		}
+
+		Bestiary: Toad might be a coward, but he'll sell some pretty useful equipment
+
+		Dialogue: {
+			0: Hey! How did we end up here?
+			1: Would you like to buy some clothes? This place has some incredible materials.
+			2: I'll get more stock every now and then. You just do your thing!
+			3: No one has a sexier moustache than you, {0}!
+
+			Alt: {
+				0: Who are you...
+				1: I think I'm lost. I need to find the Princess!
+				2: My mom says I'm not supposed to talk to strangers...
+				3: INTRUDER ALERT! INTRUDER ALERT! INTRUDER ALERT!
+			}
+		}
+
+		TownNPCMood: {
+			Content: I am content.
+			NoHome: I hate not having a home.
+			FarFromHome: I am too far from home.
+			LoveSpace: I love having so much space.
+			DislikeCrowded: I dislike how crowded I am.
+			HateCrowded: I hate how crowded I am.
+			LoveBiome: I love {BiomeName}.
+			LikeBiome: I like {BiomeName}.
+			DislikeBiome: I dislike {BiomeName}.
+			LoveNPC: I love {NPCName}.
+			LikeNPC: I like {NPCName}.
+			DislikeNPC: I dislike {NPCName}.
+			HateNPC: I hate {NPCName}.
+			LikeNPC_Princess: I like {NPCName}.
+			Princess_LovesNPC: I like {NPCName}.
+		}
+	}
+}
 
 Projectiles: {
 	StompHitbox.DisplayName: Stomp Hitbox
@@ -410,7 +533,7 @@ Projectiles: {
 		Abilities: {
 			0: {
 				Name: Dash
-				Text: Double tap left or right to dash into a run
+				Text: Right click to dash towards a direction, allowing you to run on water
 			}
 
 			1: {
@@ -431,19 +554,14 @@ UI: {
 		Badge: Badge
 	}
 
-	ObjectSpawnerBlock: {
-		HowTo: Select an object from the left panel. Edit any properties or reorder the list from this panel.\n\nStrike the block to get its contents in listed order (from top to bottom).
-		Exit: Exit (WILL NOT SAVE!)
-		Save: Save
+	BroInfoUI: {
+		PageButton: Bro Gear
+		Pow: Power
 	}
 
-	BroInfoUI.PageButton: Bro Gear
 	HealSPTooltip: Restores {0} SP
 	UseSPTooltip: Uses {0} SP
-	Level: Level
-	LevelUp: Level Up!
-	Rank: Rank
-	RankUp: Rank Up!
+	CycleShop: Cycle shop
 }
 
 Buffs: {
@@ -452,3 +570,5 @@ Buffs: {
 		Description: You are a Boo! (in spirit)
 	}
 }
+
+Emotes.ToadEmote.Command: toademote

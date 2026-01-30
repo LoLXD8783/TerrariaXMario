@@ -33,6 +33,8 @@ internal class SuperLeaf : Powerup
         CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
 
         if (modPlayer?.flightState == FlightState.None && !modPlayer.GroundPounding) modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = modPlayer.hasPSpeed ? "Flying" : null;
+
+        player.noFallDmg = true;
     }
 
     internal override void OnRightClick(Player player)
@@ -44,7 +46,7 @@ internal class SuperLeaf : Powerup
         SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/PowerupEffects/TailSwipe") { Volume = 0.4f }, player.MountedCenter);
         modPlayer?.SetForceDirection(10, ForceArmMovementType.None, -player.direction);
         Projectile.NewProjectile(player.GetSource_Misc("TailSwipe"), player.MountedCenter, Vector2.Zero, ModContent.ProjectileType<TailSwipe>(), player.GetModPlayerOrNull<CapEffectsPlayer>()?.StatPower ?? 1, 7.5f, player.whoAmI);
-        modPlayer?.PowerupCharge -= 30;
+        modPlayer?.PowerupCharge -= 35;
     }
 
     internal override void OnJumpHeldDown(Player player)
@@ -61,11 +63,11 @@ internal class SuperLeaf : Powerup
         {
             case FlightState.None:
                 if (modPlayer.hasPSpeed) modPlayer.flightState = FlightState.Flying;
-                else if (player.velocity.Y > 0) modPlayer.flightState = FlightState.Gliding;
+                else if (player.gravDir == 1 ? player.velocity.Y > 0 : player.velocity.Y < 0) modPlayer.flightState = FlightState.Gliding;
                 break;
             case FlightState.Gliding:
                 modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = "Flying";
-                if (player.velocity.Y > 0) player.velocity.Y = 1;
+                if (player.gravDir == 1 ? player.velocity.Y > 0 : player.velocity.Y < 0) player.velocity.Y = 1 * player.gravDir;
 
                 if (!SoundEngine.TryGetActiveSound(modPlayer.glideFlySoundSlot, out var glideSound))
                 {
@@ -74,7 +76,7 @@ internal class SuperLeaf : Powerup
                 break;
             case FlightState.Flying:
                 modPlayer.currentHeadVariant = modPlayer.currentBodyVariant = modPlayer.currentLegsVariant = "Flying";
-                player.velocity.Y = -2;
+                player.velocity.Y = -2 * player.gravDir;
 
                 if (Main.GameUpdateCount % runtimeDecayFactor == 0) modPlayer.runTime--;
                 if (modPlayer.runTime <= 0)

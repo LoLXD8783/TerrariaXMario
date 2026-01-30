@@ -175,7 +175,7 @@ internal abstract class PowerupProjectile : ModProjectile, ISpawnableObject
         }
     }
 
-    Vector2 scale = Vector2.One;
+    float scale = 1;
 
     public override void PostDraw(Color lightColor)
     {
@@ -186,11 +186,7 @@ internal abstract class PowerupProjectile : ModProjectile, ISpawnableObject
         if (big) Main.instance.LoadGore(415);
         else Main.instance.LoadGore(414);
 
-        //scale.X = Math.Clamp(Math.Abs(Projectile.velocity.X) * 8, 1, 1.5f);
-        //scale.Y = Math.Clamp(Math.Abs(Projectile.velocity.Y) * 8, 1, 1.5f);
-
-        scale.X = MathHelper.Lerp(scale.X, 0.05f * (float)Math.Sin(Main.GameUpdateCount * 0.05f) + 1.05f, 0.15f);
-        scale.Y = MathHelper.Lerp(scale.Y, 0.05f * (float)Math.Sin(Main.GameUpdateCount * 0.05f) + 1.05f, 0.15f);
+        scale = MathHelper.Lerp(scale, 0.05f * (float)Math.Sin(Main.GameUpdateCount * 0.05f) + 1.05f, 0.15f);
 
         Main.EntitySpriteDraw(new(TextureAssets.Gore[414].Value, Projectile.Center - Main.screenPosition, null, Color.White, 0, new Vector2(big ? 32 : 24), scale, Microsoft.Xna.Framework.Graphics.SpriteEffects.None));
     }

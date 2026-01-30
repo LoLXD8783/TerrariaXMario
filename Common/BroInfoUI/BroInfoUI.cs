@@ -76,11 +76,12 @@ internal class BroInfoUI : UIState
             base.Draw(spriteBatch);
             if (BroInfoPageButton?.IsMouseHovering ?? false) Main.hoverItemName = Language.GetTextValue($"Mods.{nameof(TerrariaXMario)}.UI.BroInfoUI.PageButton");
 
-            if (Main.EquipPage == 0 && showBroInfo) // copied from Main.DrawDefenseCounter()
+            Player player = Main.LocalPlayer;
+            if (Main.EquipPage == 0 && (player.GetModPlayerOrNull<BroInfoPlayer>()?.ShowBroInfo ?? false)) // copied from Main.DrawDefenseCounter()
             {
+                CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
                 Texture2D texture = TextureAssets.Extra[ExtrasID.DefenseShield].Value;
                 Vector2 position = AccessorySlotLoader.DefenseIconPosition + new Vector2(48, -340);
-                Player player = Main.LocalPlayer;
                 float scale = Main.inventoryScale * 1.42f;
 
                 Vector2 vector = new(position.X - 10 - 47 - 47 - 14, (float)position.Y + (float)TextureAssets.InventoryBack.Height() * 0.5f);
@@ -98,6 +99,24 @@ internal class BroInfoUI : UIState
                     }
                 }
                 UILinkPointNavigator.SetPosition(1557, vector + texture.Size() * scale / 4f);
+
+                Texture2D texture2 = ModContent.Request<Texture2D>($"{GetType().Namespace!.Replace(".", "/")}/PowCounter").Value;
+                Vector2 position2 = position + new Vector2(0, 56 * scale);
+
+                Vector2 vector3 = new(position2.X - 10 - 47 - 47 - 14, (float)position2.Y + (float)TextureAssets.InventoryBack.Height() * 0.5f);
+                spriteBatch.Draw(texture2, vector3, null, Color.White, 0f, texture2.Size() / 2f, scale, SpriteEffects.None, 0f);
+                Vector2 vector4 = FontAssets.MouseText.Value.MeasureString(modPlayer?.StatPower.ToString());
+                ChatManager.DrawColorCodedStringWithShadow(spriteBatch, FontAssets.MouseText.Value, modPlayer?.StatPower.ToString(), vector3 - vector4 * 0.5f * scale, Color.White, 0f, Vector2.Zero, new Vector2(scale));
+                if (Utils.CenteredRectangle(vector3, texture2.Size()).Contains(new Point(Main.mouseX, Main.mouseY)) && !PlayerInput.IgnoreMouseInterface)
+                {
+                    player.mouseInterface = true;
+                    string value = modPlayer?.StatPower.ToString() + " " + Language.GetTextValue($"Mods.{nameof(TerrariaXMario)}.UI.BroInfoUI.Pow");
+                    if (!string.IsNullOrEmpty(value))
+                    {
+                        Main.hoverItemName = value;
+                    }
+                }
+                UILinkPointNavigator.SetPosition(1557, vector3 + texture2.Size() * scale / 4f);
             }
         }
     }

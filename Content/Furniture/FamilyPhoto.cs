@@ -21,7 +21,7 @@ internal class FamilyPhotoTile : ModTile
         TileObjectData.newTile.CoordinateHeights = [16, 16, 16, 16, 16];
         TileObjectData.addTile(Type);
 
-        AddMapEntry(Color.HotPink);
+        AddMapEntry(new Color(150, 107, 75));
     }
 }
 
@@ -33,5 +33,6 @@ internal class FamilyPhoto : ModItem
 
         Item.width = 40;
         Item.height = 40;
+        Item.value = Item.sellPrice(silver: 20);
     }
 }
