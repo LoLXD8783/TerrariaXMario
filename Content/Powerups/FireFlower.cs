@@ -1,69 +1,88 @@
 ﻿using Microsoft.Xna.Framework;
-using System;
 using Terraria;
-using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.ID;
 using Terraria.ModLoader;
 using TerrariaXMario.Common.CapEffects;
 using TerrariaXMario.Content.Caps;
-using TerrariaXMario.Content.PowerupProjectiles;
+using TerrariaXMario.Content.Projectiles;
 using TerrariaXMario.Utilities.Extensions;
 
 namespace TerrariaXMario.Content.Powerups;
 
 internal class FireFlower : Powerup
 {
-    internal override int? ProjectileType => ModContent.ProjectileType<FireFlowerProjectile>();
-    internal override int? ItemType => ModContent.ItemType<FireFlowerItem>();
+    internal override string[] Caps => [nameof(Mario), nameof(Luigi)];
 
-    internal override ForceArmMovementType RightClickArmMovementType => ForceArmMovementType.Swing;
-    internal override Color Color => new(234, 51, 34);
-    internal override void UpdateWorld(Projectile projectile, int updateCount)
+    internal virtual int ProjectileType => ModContent.ProjectileType<FireFlowerFireball>();
+    internal virtual float ProjectileGravity => 0.4f;
+
+    private int upgrade;
+    private int ingredientTypeForUpgrade3;
+
+    public override void SetDefaults()
     {
-        projectile.velocity.Y += 0.4f;
+        base.SetDefaults();
+        Item.UseSound = new($"{TerrariaXMario.Sounds}/PowerupEffects/{Name}Shoot") { Volume = 0.4f };
     }
 
-    internal static Vector2 GetInitialProjectileVelocity(Player player, float gravity)
+    public override bool CanUseItem(Player player) => player.GetModPlayerOrNull<CapEffectsPlayer>()?.StatSP >= (AltUse(player) ? 15 : 5);
+    internal override void Use(Player player)
     {
-        Vector2 start = player.MountedCenter;
-        Vector2 apex = Main.MouseWorld;
+        Main.NewText(upgrade);
+        Vector2 velocity = TerrariaXMario.GetInitialProjectileVelocity(player, ProjectileGravity);
+        int damage = player.GetModPlayerOrNull<CapEffectsPlayer>()?.StatPower ?? 1;
+        float knockback = damage * 0.05f;
 
-        float dy = start.Y - apex.Y;
-        if (dy <= 0)
+        Projectile.NewProjectile(Item.GetSource_FromThis(), player.MountedCenter, velocity, ProjectileType, damage, knockback, player.whoAmI);
+
+        for (int i = -1; i < 2; i++)
         {
-            Vector2 speed = (apex - start).SafeNormalize(Vector2.Zero) * (apex.Distance(start) * 0.05f);
-            return new(MathHelper.Clamp(speed.X, -12, 12), MathHelper.Clamp(speed.Y, -12, 12));
+            if (i == 0) continue;
+
+            Projectile.NewProjectile(Item.GetSource_FromThis("Mini Fireball"), player.MountedCenter, Vector2.Transform(velocity, Matrix.CreateRotationZ(MathHelper.PiOver4 * 0.25f * i)), ProjectileType, damage, knockback, player.whoAmI);
+        }
+    }
+
+    public override void AddRecipes()
+    {
+        Recipe recipe = Recipe.Create(Type)
+            .AddTile(TileID.CookingPots)
+            .AddIngredient(Type);
+
+        switch (upgrade)
+        {
+            case 0:
+                recipe.AddIngredient(ItemID.MeteoriteBar, 8);
+                break;
+            case 1:
+                recipe.AddIngredient(ItemID.HellstoneBar, 12);
+                break;
+            case 2:
+                recipe.AddIngredient(ItemID.CursedFlame, 16);
+                Recipe.Create(Type)
+                    .AddTile(TileID.CookingPots)
+                    .AddIngredient(Type)
+                    .AddIngredient(ItemID.Ichor, 16)
+                    .Register();
+                break;
+            case 3:
+                recipe.AddIngredient(ItemID.SunStone);
+                break;
+            case 4:
+                recipe.AddIngredient(ItemID.FragmentSolar, 24);
+                break;
+            default:
+                return;
         }
 
-        float vy = (float)Math.Sqrt(2f * gravity * dy);
-        float t = vy / gravity;
-        float vx = (apex.X - start.X) / t;
-
-
-        return new(MathHelper.Clamp(vx, -8, 8), -vy);
+        recipe.Register();
     }
 
-    internal override void OnRightClick(Player player)
+    public override void OnCreated(ItemCreationContext context)
     {
-        CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
+        if (context is not RecipeItemCreationContext recipeContext) return;
 
-        if (modPlayer?.fireFlowerFireballsCast > 1) return;
-
-        modPlayer?.fireFlowerFireballsCast += 1;
-        if (modPlayer?.fireFlowerCooldown == 0) modPlayer?.fireFlowerCooldown = 30;
-        SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/PowerupEffects/FireFlowerShoot") { Volume = 0.4f }, player.MountedCenter);
-        Projectile.NewProjectile(player.GetSource_FromThis(), player.MountedCenter, GetInitialProjectileVelocity(player, 0.4f), ModContent.ProjectileType<FireFlowerFireball>(), player.GetModPlayerOrNull<CapEffectsPlayer>()?.StatPower ?? 1, 0f, player.whoAmI);
-        modPlayer?.PowerupCharge -= 30;
+        upgrade = (int)MathHelper.Min(5, upgrade + 1);
     }
-}
-
-internal class FireFlowerProjectile : PowerupProjectile
-{
-    internal override int? PowerupType => ModContent.GetInstance<FireFlower>().Type;
-    internal override string[] Caps => [nameof(Mario), nameof(Luigi)];
-    internal override bool CanSpawn(Player player) => player.ZoneDesert || player.ZoneUndergroundDesert || player.ZoneUnderworldHeight;
-}
-
-internal class FireFlowerItem : PowerupItem
-{
-    internal override int? PowerupType => ModContent.GetInstance<FireFlower>().Type;
 }

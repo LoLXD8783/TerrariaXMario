@@ -1,6 +1,7 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
 using System.Collections.Generic;
 using Terraria;
 using Terraria.DataStructures;
@@ -96,5 +97,25 @@ internal class TerrariaXMario : Mod
         Tile tile = Framing.GetTileSafely(point.X, point.Y);
         TileObjectData data = TileObjectData.GetTileData(tile);
         return TileObjectData.TopLeft(point.X, point.Y).ToWorldCoordinates() + new Vector2(data.Width, data.Height) * 4;
+    }
+
+    internal static Vector2 GetInitialProjectileVelocity(Player player, float gravity)
+    {
+        Vector2 start = player.MountedCenter;
+        Vector2 apex = Main.MouseWorld;
+
+        float dy = start.Y - apex.Y;
+        if (dy <= 0)
+        {
+            Vector2 speed = (apex - start).SafeNormalize(Vector2.Zero) * (apex.Distance(start) * 0.05f);
+            return new(MathHelper.Clamp(speed.X, -12, 12), MathHelper.Clamp(speed.Y, -12, 12));
+        }
+
+        float vy = (float)Math.Sqrt(2f * gravity * dy);
+        float t = vy / gravity;
+        float vx = (apex.X - start.X) / t;
+
+
+        return new(MathHelper.Clamp(vx, -8, 8), -vy);
     }
 }

@@ -74,21 +74,25 @@ public class IceBlockNPC : GlobalNPC
         {
             if (thrown)
             {
+                npc.velocity.X -= 0.01f * Math.Sign(npc.velocity.X);
                 npc.velocity.Y += Player.defaultGravity;
                 npc.noGravity = false;
                 npc.noTileCollide = false;
 
-                foreach (NPC target in Main.ActiveNPCs)
+                if (npc.velocity.LengthSquared() >= 32)
                 {
-                    IceBlockNPC? globalNPC = target.GetGlobalNPCOrNull<IceBlockNPC>();
-                    if (target != npc && globalNPC != null && iceBlockRect.Intersects(globalNPC.iceBlockRect))
+                    foreach (NPC target in Main.ActiveNPCs)
                     {
-                        if (globalNPC.frozen) globalNPC.KillIceBlock(target);
-                        target.StrikeNPC(new() { Damage = Pow / 4 });
+                        IceBlockNPC? globalNPC = target.GetGlobalNPCOrNull<IceBlockNPC>();
+                        if (target != npc && globalNPC != null && !target.friendly && iceBlockRect.Intersects(globalNPC.iceBlockRect))
+                        {
+                            if (globalNPC.frozen) globalNPC.KillIceBlock(target);
+                            target.StrikeNPC(new() { Damage = Pow / 4 });
+                        }
                     }
                 }
 
-                if (npc.velocity.X == 0)
+                if (npc.velocity.X == 0 && npc.oldVelocity.X != 0)
                 {
                     KillIceBlock(npc);
                     npc.StrikeNPC(new() { Damage = Pow });

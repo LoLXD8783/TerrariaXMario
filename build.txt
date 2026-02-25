@@ -1,5 +1,5 @@
 displayName = [c/d91616:Mario] and [c/1b9504:Luigi]: Escapade
 author = Lacroix
 version = 2026.1.0.0
-dllReferences = KBOFXCTask, StructureHelper
+dllReferences = KBOFXCTask, StructureHelper, Daybreak
 homepage = https://github.com/justreq/TerrariaXMario/blob/master/README.md

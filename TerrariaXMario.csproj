@@ -38,4 +38,9 @@
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Localization\es-ES\" />
+	  <Folder Include="Localization\ru-RU\" />
+	</ItemGroup>
+
 </Project>

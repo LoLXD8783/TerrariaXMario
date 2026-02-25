@@ -21,39 +21,35 @@ using TerrariaXMario.Content.Blocks;
 using TerrariaXMario.Content.Caps;
 using TerrariaXMario.Content.Consumables;
 using TerrariaXMario.Content.Overalls;
-using TerrariaXMario.Content.PowerupProjectiles;
 using TerrariaXMario.Content.Powerups;
+using TerrariaXMario.Content.Projectiles;
 using TerrariaXMario.Utilities.Extensions;
 
 namespace TerrariaXMario.Common.CapEffects;
 
 internal enum Jump { None, Single, Double, Triple }
-internal enum ForceArmMovementType { None, Swing, Extend }
 internal enum FlightState { None, Gliding, Flying }
 internal class CapEffectsPlayer : ModPlayer
 {
     internal BroInfoPlayer? BroInfoPlayer => Player.GetModPlayerOrNull<BroInfoPlayer>();
 
+    internal string startingCap = "Mario";
+
     private string? oldCap;
     internal string? currentCap;
-    internal string? currentCapToDraw;
+    private Powerup? oldPowerup;
+    internal Powerup? currentPowerup;
     internal string? currentHeadVariant;
     internal string? currentBodyVariant;
     internal string? currentLegsVariant;
 
     internal string?[] CurrentVariants => [.. new string?[] { currentHeadVariant, currentBodyVariant, currentLegsVariant }.Where(e => e != null).Distinct()];
 
-    internal int? currentPowerupType;
-    internal Powerup? CurrentPowerup => currentPowerupType == null ? null : PowerupLoader.Powerups[(int)currentPowerupType];
-
     internal bool CanDoCapEffects => currentCap != null && (BroInfoPlayer?.ShowBroInfo ?? false);
 
-    private bool requestedPowerupRightClick;
     internal int forceDirection;
+    internal int forceDirectionTimer;
     internal int forceSwitchDirectionCount;
-    internal ForceArmMovementType forceArmMovementType;
-    internal int forceArmMovementDuration;
-    internal int forceArmMovementTimer;
 
     internal bool GroundPounding
     {
@@ -80,19 +76,15 @@ internal class CapEffectsPlayer : ModPlayer
     internal int? hoverNPCIndex;
     internal int? grabbedNPCIndex;
 
-    internal int fireFlowerFireballsCast;
-    internal int fireFlowerCooldown;
-
     internal FlightState flightState;
     internal SlotId glideFlySoundSlot;
     internal SlotId pSpeedSoundSlot;
 
     private int glideLegAnimationTimer;
     internal int? forceLegFrameY;
-    private int powerupRightClickActionTimer;
 
-    internal bool CanShowTail => !Main.projectile.Any(e => e.type == ModContent.ProjectileType<TailSwipe>() && e.active && e.owner == Player.whoAmI);
-    internal bool CanShowCape => !Main.projectile.Any(e => e.type == ModContent.ProjectileType<CapeSpin>() && e.active && e.owner == Player.whoAmI);
+    internal bool CanShowTail => (currentPowerup?.CanShowTail ?? false) && !Main.projectile.Any(e => e.type == ModContent.ProjectileType<TailSwipe>() && e.active && e.owner == Player.whoAmI);
+    internal bool CanShowCape => (currentPowerup?.CanShowCape ?? false) && !Main.projectile.Any(e => e.type == ModContent.ProjectileType<CapeSpin>() && e.active && e.owner == Player.whoAmI);
 
     internal bool statueForm;
     private int statueFormCooldown;
@@ -143,10 +135,12 @@ internal class CapEffectsPlayer : ModPlayer
     internal int StatPower { get; set { field = Math.Max(value, 5); } }
     internal int StatDefense { get; set { field = Math.Max(value, 0); } }
     internal int StatHP { get; set { field = Math.Max(value, 0); } }
-    internal int StatSP { get; set { field = Math.Clamp(value, 0, MaxSP); } } = 20;
+    internal int StatSP { get; set { field = Player.creativeGodMode ? MaxSP : Math.Clamp(value, 0, MaxSP); } } = 20;
 
     internal bool frogSwimming;
     internal int frogSwimFrame;
+
+    internal static bool IsPlayerMoving => PlayerInput.Triggers.Current.Right || PlayerInput.Triggers.Current.Left || PlayerInput.Triggers.Current.Up || PlayerInput.Triggers.Current.Down;
 
     internal float forceFullRotation;
     internal float forceHeadRotation;
@@ -161,11 +155,23 @@ internal class CapEffectsPlayer : ModPlayer
     internal int dashCooldown;
     internal int slippyTimer;
 
+    internal int SPRegenDelay => (int)Math.Ceiling(0.7f * ((1 - StatSP / MaxSP) * 240 + 45)); // identical to mana regen delay calculation
+    internal int spRegenDelayTimer;
+    internal float SPRegenRate => (MaxSP * 5 + 1 + (IsPlayerMoving ? 0 : (MaxSP * 5))) * (StatSP / MaxSP * 0.8f + 0.2f) * 1.15f; // close to mana regen rate calculation
+    internal float spRegenRateTimer;
+
     internal static void RestoreSP(Player player, int amount, bool effectOnly = false)
     {
         if (!effectOnly) player.GetModPlayerOrNull<CapEffectsPlayer>()?.StatSP += amount;
         CombatText.NewText(player.getRect(), Color.Orange, amount);
         SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/CapEffects/HealSP") { Volume = 0.4f }, player.MountedCenter);
+    }
+
+    internal static void UseSP(Player player, int amount, bool delay = false)
+    {
+        CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
+        modPlayer?.StatSP -= amount;
+        if (delay) modPlayer?.spRegenDelayTimer = modPlayer?.SPRegenDelay ?? 0;
     }
 
     /// <summary>
@@ -203,14 +209,13 @@ internal class CapEffectsPlayer : ModPlayer
     public override void ResetEffects()
     {
         currentCap = null;
-        currentCapToDraw = null;
+        currentPowerup = null;
         statPowerAdditive = 0;
         statPowerMultiplier = 1;
     }
 
     public override void SaveData(TagCompound tag)
     {
-        if (currentPowerupType != null) tag[nameof(currentPowerupType)] = currentPowerupType;
         tag[nameof(MaxSP)] = MaxSP;
         tag[nameof(statPowerPermanent)] = statPowerPermanent;
         tag[nameof(StatDefense)] = StatDefense;
@@ -220,7 +225,6 @@ internal class CapEffectsPlayer : ModPlayer
 
     public override void LoadData(TagCompound tag)
     {
-        if (tag.ContainsKey(nameof(currentPowerupType))) currentPowerupType = tag.GetInt(nameof(currentPowerupType));
         if (tag.ContainsKey(nameof(MaxSP))) MaxSP = tag.GetInt(nameof(MaxSP));
         if (tag.ContainsKey(nameof(statPowerPermanent))) statPowerPermanent = tag.GetInt(nameof(statPowerPermanent));
         if (tag.ContainsKey(nameof(StatDefense))) StatDefense = tag.GetInt(nameof(StatDefense));
@@ -230,7 +234,7 @@ internal class CapEffectsPlayer : ModPlayer
 
     public override bool CanUseItem(Item item)
     {
-        if (grabbedNPCIndex != null || currentJump is Jump.Double or Jump.Triple) return false;
+        if (grabbedNPCIndex != null) return false;
 
         return base.CanUseItem(item);
     }
@@ -251,18 +255,13 @@ internal class CapEffectsPlayer : ModPlayer
 
     public override void FrameEffects()
     {
-        if (currentCap == null && (BroInfoPlayer?.ShowBroInfo ?? false))
-        {
-            Player.head = Player.body = Player.legs = -1;
-        }
-
-        if (!CanDoCapEffects && !Main.gameMenu)
+        if (!Main.gameMenu && !CanDoCapEffects)
         {
             currentHeadVariant = currentBodyVariant = currentLegsVariant = null;
             return;
         }
 
-        if (Main.gameMenu && (!BroInfoPlayer?.ShowBroInfo ?? true)) return;
+        if (!Main.gameMenu && (!BroInfoPlayer?.ShowBroInfo ?? true)) return;
 
         if (statueForm) currentHeadVariant = "Statue";
         else if (currentHeadVariant == "Statue") currentHeadVariant = null;
@@ -270,20 +269,23 @@ internal class CapEffectsPlayer : ModPlayer
         if (frogSwimming) currentHeadVariant = "FrogSwimming";
         else if (currentHeadVariant == "FrogSwimming") currentHeadVariant = null;
 
-        int head = EquipLoader.GetEquipSlot(Mod, $"{(statueForm || frogSwimming ? "" : CurrentPowerup?.Name)}{currentCapToDraw}{currentHeadVariant ?? ""}", EquipType.Head);
-        Player.head = head == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCapToDraw}{currentHeadVariant ?? ""}", EquipType.Head) : head;
+        int head = EquipLoader.GetEquipSlot(Mod, $"{(statueForm || frogSwimming || currentPowerup == null ? "" : currentPowerup.Name)}{currentCap}{currentHeadVariant ?? ""}", EquipType.Head);
+        Player.head = head == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCap}{currentHeadVariant ?? ""}", EquipType.Head) : head;
 
         if (statueForm || frogSwimming) return;
 
-        int body = EquipLoader.GetEquipSlot(Mod, $"{CurrentPowerup?.Name}{currentCapToDraw}{currentBodyVariant ?? ""}", EquipType.Body);
-        Player.body = body == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCapToDraw}{currentBodyVariant ?? ""}", EquipType.Body) : body;
+        int body = EquipLoader.GetEquipSlot(Mod, $"{currentPowerup?.Name ?? ""}{currentCap}{currentBodyVariant ?? ""}", EquipType.Body);
+        Player.body = body == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCap}{currentBodyVariant ?? ""}", EquipType.Body) : body;
 
-        int legs = EquipLoader.GetEquipSlot(Mod, $"{CurrentPowerup?.Name}{currentCapToDraw}{currentLegsVariant ?? ""}", EquipType.Legs);
-        Player.legs = legs == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCapToDraw}{currentLegsVariant ?? ""}", EquipType.Legs) : legs;
+        int legs = EquipLoader.GetEquipSlot(Mod, $"{currentPowerup?.Name ?? ""}{currentCap}{currentLegsVariant ?? ""}", EquipType.Legs);
+        Player.legs = legs == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCap}{currentLegsVariant ?? ""}", EquipType.Legs) : legs;
 
-        if (CurrentPowerup != null && PowerupID.Sets.ShowTail[CurrentPowerup.Type] && CanShowTail)
+        int back = EquipLoader.GetEquipSlot(Mod, $"{currentPowerup?.Name ?? ""}{currentCap}", EquipType.Back);
+        Player.back = back == -1 ? EquipLoader.GetEquipSlot(Mod, $"{currentCap}", EquipType.Back) : back;
+
+        if (currentPowerup != null && CanShowTail)
         {
-            Player.waist = EquipLoader.GetEquipSlot(Mod, $"{currentCapToDraw}Tail{(flightState == FlightState.Flying ? "Flying" : "")}", EquipType.Waist);
+            Player.waist = EquipLoader.GetEquipSlot(Mod, $"{currentCap}Tail{(flightState == FlightState.Flying ? "Flying" : "")}", EquipType.Waist);
         }
     }
 
@@ -306,11 +308,25 @@ internal class CapEffectsPlayer : ModPlayer
 
     public override void PreUpdate()
     {
+        if (forceDirectionTimer > 0) forceDirectionTimer--;
+        else forceDirection = 0;
+
         if (!CanDoCapEffects || Player.mount.Active || Player.sleeping.isSleeping)
         {
             glideLegAnimationTimer = 0;
             forceLegFrameY = null;
             return;
+        }
+
+        if (spRegenDelayTimer > 0) spRegenDelayTimer--;
+        else
+        {
+            if (spRegenRateTimer >= 120)
+            {
+                StatSP++;
+                spRegenRateTimer = 0;
+            }
+            else spRegenRateTimer += SPRegenRate;
         }
 
         GrabEffect();
@@ -337,6 +353,8 @@ internal class CapEffectsPlayer : ModPlayer
         if (statueForm) Player.fullRotation = 0;
 
         if (shouldRemovePowerup && flightState == FlightState.Flying) flightState = FlightState.Gliding;
+
+        if (Player.creativeGodMode) StatSP = MaxSP;
     }
 
     public override void PostUpdateRunSpeeds()
@@ -345,7 +363,7 @@ internal class CapEffectsPlayer : ModPlayer
 
         if (currentCap == "Luigi") Player.maxRunSpeed *= 1.05f;
 
-        if (currentPowerupType == ModContent.GetInstance<FrogSuit>().Type && !frogSwimming && !CurrentVariants.Contains("Running") && new int[] { 12, 18 }.Contains(Player.legFrame.Y / 56))
+        if (Powerup.IsType<FrogSuit>(currentPowerup) && !frogSwimming && !CurrentVariants.Contains("Running") && new int[] { 12, 18 }.Contains(Player.legFrame.Y / 56))
         {
             Player.maxRunSpeed *= 0.25f;
             Player.velocity.X = 0.4f * Player.direction;
@@ -372,9 +390,10 @@ internal class CapEffectsPlayer : ModPlayer
     public override void PostUpdate()
     {
         CapEffect();
+        PowerupEffect();
         ObjectSpawnerBlockHitEffect();
 
-        if (currentPowerupType == null || currentPowerupType != ModContent.GetInstance<FrogSuit>().Type) frogSwimming = false;
+        if (currentPowerup == null || !Powerup.IsType<FrogSuit>(currentPowerup)) frogSwimming = false;
 
         if (!CanDoCapEffects || Player.mount.Active || Player.sleeping.isSleeping)
         {
@@ -384,6 +403,8 @@ internal class CapEffectsPlayer : ModPlayer
             statueForm = false;
             doCapeFlight = false;
             frogSwimming = false;
+            forceDirection = 0;
+            forceSwitchDirectionCount = 0;
 
             return;
         }
@@ -391,21 +412,15 @@ internal class CapEffectsPlayer : ModPlayer
         JumpEffect();
         StompEffect();
         GrabEffectCompositeArms();
-        DoPowerupRightClick();
         CapeFlightEffect();
 
-        if (currentJump is Jump.Double or Jump.Triple && !PlayerInput.Triggers.Current.Down && !Player.IsOnGroundPrecise() && flightState == FlightState.None) Player.bodyFrame.Y = 56 * 10;
-
-        if (fireFlowerCooldown > 0) fireFlowerCooldown--;
-        else if (fireFlowerFireballsCast > 0) fireFlowerFireballsCast = 0;
+        if (currentJump is Jump.Double or Jump.Triple && !PlayerInput.Triggers.Current.Down && !Player.IsOnGroundPrecise() && flightState == FlightState.None && Player.ItemTimeIsZero) Player.bodyFrame.Y = 56 * 10;
 
         if (flightState != FlightState.None && Player.IsOnGroundPrecise())
         {
             currentHeadVariant = currentBodyVariant = currentLegsVariant = null;
             flightState = FlightState.None;
         }
-
-        if (powerupRightClickActionTimer > 0) powerupRightClickActionTimer--;
 
         if (statueFormCooldown > 0) statueFormCooldown--;
         else if (statueForm && !Player.controlDown)
@@ -415,7 +430,7 @@ internal class CapEffectsPlayer : ModPlayer
             SpawnStatueSparkle();
         }
 
-        if (statueForm && CurrentPowerup is not TanookiSuit) statueForm = false;
+        if (statueForm && !Powerup.IsType<TanookiSuit>(currentPowerup)) statueForm = false;
 
         if (frogSwimming)
         {
@@ -447,19 +462,18 @@ internal class CapEffectsPlayer : ModPlayer
         {
             if (Main.cursorOverride == TerrariaXMario.Instance.CursorThrowIndex)
             {
-
                 NPC grabbedNPC = Main.npc[(int)grabbedNPCIndex!];
-                SetForceDirection(10, ForceArmMovementType.Swing, Math.Sign(Main.MouseWorld.X - Player.position.X));
-                grabbedNPC.velocity.X = 7.5f * forceDirection;
+                SetForceDirection(10, Math.Sign(Main.MouseWorld.X - Player.position.X));
+                grabbedNPC.velocity = TerrariaXMario.GetInitialProjectileVelocity(Player, Player.defaultGravity);
                 grabbedNPC.GetGlobalNPCOrNull<IceBlockNPC>()?.thrown = true;
                 grabbedNPCIndex = null;
             }
             else if (Main.cursorOverride == TerrariaXMario.Instance.CursorGrabIndex) grabbedNPCIndex = hoverNPCIndex;
         }
 
-        if (CurrentPowerup != null && grabbedNPCIndex == null)
+        if (currentPowerup != null && grabbedNPCIndex == null)
         {
-            if (PlayerInput.Triggers.Current.Jump && !Player.mount.Active) CurrentPowerup?.OnJumpHeldDown(Player);
+            if (PlayerInput.Triggers.Current.Jump && !Player.mount.Active) currentPowerup?.OnJumpHeldDown(Player);
 
             if (PlayerInput.Triggers.JustReleased.Jump)
             {
@@ -475,32 +489,29 @@ internal class CapEffectsPlayer : ModPlayer
 
         if (PlayerInput.Triggers.JustPressed.Down && !doCapeFlight && stompHitbox != null)
         {
-            if (currentPowerupType == null || !PowerupID.Sets.DisableGroundPound[(int)currentPowerupType])
+            StompHitbox stompHitboxProjectile = (StompHitbox)Main.projectile[(int)stompHitbox].ModProjectile;
+
+            if (!stompHitboxProjectile.groundPound)
             {
-                StompHitbox stompHitboxProjectile = (StompHitbox)Main.projectile[(int)stompHitbox].ModProjectile;
+                SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/CapEffects/GroundPoundStart") { Volume = 0.4f }, Player.MountedCenter);
+                Player.fullRotation = 0;
+                stompHitboxProjectile.groundPound = true;
+            }
 
-                if (!stompHitboxProjectile.groundPound)
+            if (Powerup.IsType<TanookiSuit>(currentPowerup) && !statueForm)
+            {
+                foreach (Projectile projectile in Main.ActiveProjectiles)
                 {
-                    SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/CapEffects/GroundPoundStart") { Volume = 0.4f }, Player.MountedCenter);
-                    Player.fullRotation = 0;
-                    stompHitboxProjectile.groundPound = true;
+                    if (projectile.owner == Player.whoAmI && projectile.type == ModContent.ProjectileType<TailSwipe>()) projectile.Kill();
                 }
 
-                if (CurrentPowerup is TanookiSuit && !statueForm)
-                {
-                    foreach (Projectile projectile in Main.ActiveProjectiles)
-                    {
-                        if (projectile.owner == Player.whoAmI && projectile.type == ModContent.ProjectileType<TailSwipe>()) projectile.Kill();
-                    }
-
-                    PowerupCharge -= 50;
-                    SpawnStatueSparkle();
-                    forceDirection = 0;
-                    directionWhenTurnedToStatue = Player.direction;
-                    Player.direction = 1;
-                    statueForm = true;
-                    statueFormCooldown = 15;
-                }
+                PowerupCharge -= 50;
+                SpawnStatueSparkle();
+                forceDirection = 0;
+                directionWhenTurnedToStatue = Player.direction;
+                Player.direction = 1;
+                statueForm = true;
+                statueFormCooldown = 15;
             }
         }
 
@@ -529,7 +540,7 @@ internal class CapEffectsPlayer : ModPlayer
 
         if (frogSwimming)
         {
-            if ((PlayerInput.Triggers.Current.Right || PlayerInput.Triggers.Current.Left || PlayerInput.Triggers.Current.Up || PlayerInput.Triggers.Current.Down) && Main.GameUpdateCount % 10 == 0)
+            if ((IsPlayerMoving) && Main.GameUpdateCount % 10 == 0)
             {
                 frogSwimFrame = frogSwimFrame == 2 ? 0 : frogSwimFrame + 1;
             }
@@ -598,7 +609,7 @@ internal class CapEffectsPlayer : ModPlayer
     public override void UpdateDead()
     {
         Player.fullRotation = 0;
-        currentPowerupType = null;
+        currentPowerup = null;
         frogSwimming = false;
         KillStompHitbox();
     }
@@ -612,36 +623,36 @@ internal class CapEffectsPlayer : ModPlayer
         return base.ImmuneTo(damageSource, cooldownCounter, dodgeable);
     }
 
-    internal void SetForceDirection(int duration, ForceArmMovementType type, int direction)
+    public override IEnumerable<Item> AddStartingItems(bool mediumCoreDeath)
+    {
+        int startingCapType = startingCap switch
+        {
+            "Mario" => ModContent.ItemType<Mario>(),
+            "Luigi" => ModContent.ItemType<Luigi>(),
+            _ => -1
+        };
+
+        if (startingCapType == -1) return [new(ModContent.ItemType<ThinWear>())];
+        return [new(startingCapType), new(ModContent.ItemType<ThinWear>())];
+    }
+
+    internal void SetForceDirection(int duration, int direction)
     {
         if (duration <= 0 || Math.Abs(direction) != 1) return;
 
-        forceArmMovementType = type;
-        forceArmMovementTimer = duration;
         forceDirection = direction;
+        forceDirectionTimer = duration;
         if (forceSwitchDirectionCount > 0) forceSwitchDirectionCount--;
         Player.direction = direction;
-
-        if (requestedPowerupRightClick && !shouldRemovePowerup)
-        {
-            if (CurrentPowerup != null && powerupRightClickActionTimer == 0)
-            {
-                CurrentPowerup.OnRightClick(Player);
-                powerupRightClickActionTimer = CurrentPowerup.RightClickActionCooldown;
-            }
-
-            requestedPowerupRightClick = false;
-        }
     }
 
     internal void RemovePowerup()
     {
-        if (currentPowerupType != null)
+        if (currentPowerup != null)
         {
             Player.fullRotation = 0;
             shouldRemovePowerup = false;
-            currentPowerupType = null;
-            SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/PowerupEffects/PowerDown") { Volume = 0.4f }, Player.MountedCenter);
+            currentPowerup = null;
         }
     }
 
@@ -653,42 +664,14 @@ internal class CapEffectsPlayer : ModPlayer
             if (!BroInfoPlayer?.ShowBroInfo ?? false) BroInfoPlayer?.ShowBroInfo = true;
             oldCap = currentCap;
         }
+    }
 
-        if (!CanDoCapEffects)
+    private void PowerupEffect()
+    {
+        if (oldPowerup == null && currentPowerup != null || oldPowerup != null && currentPowerup == null)
         {
-            forceDirection = 0;
-            forceSwitchDirectionCount = 0;
-            forceArmMovementType = ForceArmMovementType.None;
-            forceArmMovementDuration = 0;
-            forceArmMovementTimer = 0;
-            return;
-        }
-
-        if (forceArmMovementTimer > 0)
-        {
-            if (forceArmMovementDuration == 0) forceArmMovementDuration = forceArmMovementTimer;
-
-            if (forceArmMovementType != ForceArmMovementType.None)
-            {
-                int i = Math.Clamp(Math.Max(1, 4 - (int)Math.Floor((double)forceArmMovementTimer / forceArmMovementDuration * 4)), 1, 4);
-
-                if (forceArmMovementType == ForceArmMovementType.Swing) Player.bodyFrame.Y = 56 * i;
-                else if (forceArmMovementType == ForceArmMovementType.Extend) Player.SetCompositeArmFront(true, (Player.CompositeArmStretchAmount)(i == 4 ? 0 : i), Player.MountedCenter.DirectionTo(Main.MouseWorld).ToRotation() - MathHelper.PiOver2);
-            }
-
-            forceArmMovementTimer--;
-
-            if (forceArmMovementTimer <= 0)
-            {
-                if (forceSwitchDirectionCount > 0) SetForceDirection(forceArmMovementDuration, forceArmMovementType, -forceDirection);
-                else
-                {
-                    forceDirection = 0;
-                    forceArmMovementType = ForceArmMovementType.None;
-                    forceArmMovementDuration = 0;
-                    forceArmMovementTimer = 0;
-                }
-            }
+            SoundEngine.PlaySound(new(currentPowerup == null ? $"{TerrariaXMario.Sounds}/PowerupEffects/PowerDown" : currentPowerup.PowerUpSound) { Volume = 0.4f }, Player.MountedCenter);
+            oldPowerup = currentPowerup;
         }
     }
 
@@ -739,7 +722,7 @@ internal class CapEffectsPlayer : ModPlayer
 
         if (Player.justJumped)
         {
-            if (currentPowerupType == ModContent.GetInstance<FrogSuit>().Type && !CurrentVariants.Contains("Running")) return;
+            if (Powerup.IsType<FrogSuit>(currentPowerup) && !CurrentVariants.Contains("Running")) return;
             if (groundPoundJumpTimer == 0) currentJump = currentJump == Jump.Triple ? Jump.Single : currentJump + 1;
 
             if (currentJump == Jump.Triple)
@@ -832,7 +815,7 @@ internal class CapEffectsPlayer : ModPlayer
 
             if (globalNPC == null) return;
 
-            if (!globalNPC.frozen || globalNPC.thrown || !globalNPC.iceBlockRect.Intersects(new Rectangle((int)Main.MouseWorld.X, (int)Main.MouseWorld.Y, 1, 1)))
+            if (!globalNPC.frozen || (globalNPC.thrown && hoverNPC.velocity != Vector2.Zero) || !globalNPC.iceBlockRect.Intersects(new Rectangle((int)Main.MouseWorld.X, (int)Main.MouseWorld.Y, 1, 1)))
             {
                 hoverNPCIndex = null;
                 return;
@@ -858,23 +841,6 @@ internal class CapEffectsPlayer : ModPlayer
         foreach (Point point in HitObjectSpawnerBlocks(1))
         {
             SpawnObjectFromBlock(point, bufferPlayer: true);
-        }
-    }
-
-    private void DoPowerupRightClick()
-    {
-        if (!Player.tileInteractionHappened && CurrentPowerup != null && grabbedNPCIndex == null && PlayerInput.Triggers.JustPressed.MouseRight && !Player.mouseInterface && Main.mouseItem.IsAir && !statueForm && !shouldRemovePowerup)
-        {
-            if (CurrentPowerup.LookTowardRightClick)
-            {
-                requestedPowerupRightClick = true;
-                SetForceDirection(10, CurrentPowerup.RightClickArmMovementType, Math.Sign(Main.MouseWorld.X - Player.position.X));
-            }
-            else if (powerupRightClickActionTimer == 0)
-            {
-                CurrentPowerup.OnRightClick(Player);
-                powerupRightClickActionTimer = CurrentPowerup.RightClickActionCooldown;
-            }
         }
     }
 
@@ -938,12 +904,7 @@ internal class CapEffectsPlayer : ModPlayer
             globalItem?.spawnedFromBottom = spawnFromBottom;
         }
 
-        if (objectToSpawn is PowerupProjectile projectile)
-        {
-            SoundEngine.PlaySound(new($"{TerrariaXMario.Sounds}/Misc/PowerupSpawn"), center);
-            Projectile.NewProjectile(Player.GetSource_TileInteraction(point.Value.X, point.Value.Y), center + new Vector2(0, spawnFromBottom ? 4 : -4), new Vector2(0, spawnFromBottom ? projectile.SpawnDownSpeed : projectile.SpawnUpSpeed), projectile.Type, 0, 0);
-        }
-        else if (objectToSpawn is ModItem item) SpawnItem(item.Item);
+        if (objectToSpawn is ModItem item) SpawnItem(item.Item);
         else if (objectToSpawn is DefaultSpawnableObject)
         {
             if (Main.rand.NextBool()) SpawnItem(new(ItemID.Mushroom));
@@ -971,17 +932,8 @@ internal class CapEffectsPlayer : ModPlayer
 
         if (!hasMariosCap && !hasLuigisCap && currentCap == null && Player.trashItem.ModItem is not CapItem) return Main.rand.NextFromCollection([.. ModContent.GetContent<ISpawnableObject>().Where(e => e is CapItem)]);
 
-        var pool = ModContent.GetContent<PowerupProjectile>().Where(i => i.CanSpawn(Player)).ToList();
-        if (pool.Count > 0)
-        {
-            PowerupProjectile item = Main.rand.NextFromCollection(pool);
-            bool hasPowerupItem = item.PowerupData != null && item.PowerupData.ItemType != null && item.PowerupType != null && (currentPowerupType == item.PowerupType || Player.HasItemInAnyInventory((int)item.PowerupData.ItemType));
 
-            if (Main.rand.NextBool(5 * (hasPowerupItem ? 10 : 1))) return item;
-        }
-
-
-        IEnumerable<ISpawnableObject> list = ModContent.GetContent<ISpawnableObject>().Where(e => e is not PowerupProjectile);
+        IEnumerable<ISpawnableObject> list = ModContent.GetContent<ISpawnableObject>();
         if (Main.netMode == NetmodeID.SinglePlayer) list = [.. list.Where(e => e is not Nut1)];
         float num = Main.rand.NextFloat();
 

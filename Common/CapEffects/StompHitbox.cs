@@ -62,7 +62,7 @@ internal class StompHitbox : ModProjectile
         }
 
         CapEffectsPlayer? modPlayer = player.GetModPlayerOrNull<CapEffectsPlayer>();
-        if (modPlayer == null || (modPlayer.currentPowerupType != null && PowerupID.Sets.DisableGroundPound[(int)modPlayer.currentPowerupType])) return;
+        if (modPlayer == null) return;
         modPlayer.GroundPounding = groundPound;
 
         if (groundPound)
@@ -81,7 +81,7 @@ internal class StompHitbox : ModProjectile
                 player.fullRotationOrigin = new Vector2(player.Size.X * 0.5f, player.Size.Y * (player.gravDir == 1 ? 0.75f : 0.25f));
                 player.velocity = new(0, 0.1f * player.gravDir);
 
-                if (modPlayer.CurrentPowerup is not TanookiSuit)
+                if (modPlayer.currentPowerup is not TanookiSuit)
                 {
                     if (groundPoundCooldown <= 5) player.fullRotation = player.direction * player.gravDir * (groundPoundCooldown * MathHelper.Pi * 0.2f);
                     else if (groundPoundCooldown <= 15) player.fullRotation = player.direction * player.gravDir * (MathHelper.Pi + (groundPoundCooldown - 5) * MathHelper.Pi * 0.1f);

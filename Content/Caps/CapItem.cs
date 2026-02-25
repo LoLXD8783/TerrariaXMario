@@ -90,9 +90,9 @@ internal abstract class CapItem : ModItem, ISpawnableObject
 
         if (Name == "Luigi" && !player.IsOnGroundPrecise()) player.gravity = 0.2f + (capEffectsPlayer.currentJump is Jump.Double or Jump.Triple ? 0.05f : 0);
 
-        if (!capEffectsPlayer.GroundPounding && capEffectsPlayer.currentPowerupType != ModContent.GetInstance<FrogSuit>().Type) player.spikedBoots = 1;
+        if (!capEffectsPlayer.GroundPounding && !Powerup.IsType<FrogSuit>(player.GetModPlayerOrNull<CapEffectsPlayer>()?.currentPowerup)) player.spikedBoots = 1;
 
-        capEffectsPlayer.CurrentPowerup?.UpdateConsumed(player);
+        capEffectsPlayer.currentPowerup?.UpdateAmbientEffects(player);
 
         if (!player.GetModPlayerOrNull<BroInfoPlayer>()?.ShowBroInfo ?? true) return;
 
@@ -108,7 +108,7 @@ internal abstract class CapItem : ModItem, ISpawnableObject
 
     public override void UpdateVisibleAccessory(Player player, bool hideVisual)
     {
-        player.GetModPlayerOrNull<CapEffectsPlayer>()?.currentCapToDraw = Name;
+        player.GetModPlayerOrNull<CapEffectsPlayer>()?.currentCap = Name;
     }
 }
 

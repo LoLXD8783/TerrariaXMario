@@ -1,0 +1,373 @@
+BrickBlock: {
+	DisplayName: Brick Block
+	Tooltip: Can contain certain special objects
+}
+
+Pipe: {
+	DisplayName: Pipe
+	Tooltip: ""
+}
+
+QuestionBlock: {
+	DisplayName: ? Block
+	Tooltip: Can contain certain special objects
+}
+
+Luigi: {
+	DisplayName: Luigi's Cap
+	Tooltip: Transforms its wearer into Super Luigi
+}
+
+Mario: {
+	DisplayName: Mario's Cap
+	Tooltip: Transforms its wearer into Super Mario
+}
+
+EdibleMushroom2: {
+	DisplayName: Super Mushroom
+	Tooltip: ""
+}
+
+EdibleMushroom3: {
+	DisplayName: Ultra Mushroom
+	Tooltip: ""
+}
+
+EdibleMushroom4: {
+	DisplayName: Max Mushroom
+	Tooltip: ""
+}
+
+EdibleMushroomBad: {
+	DisplayName: Poison Mushroom
+	Tooltip: Why would anyone want to eat this?
+}
+
+RefreshingHerb: {
+	DisplayName: Refreshing Herb
+	Tooltip:
+		'''
+		Clears all debuffs
+		'It's just what the doctor ordered!'
+		'''
+}
+
+RevivingMushroom1: {
+	DisplayName: 1UP Mushroom
+	Tooltip: Prevents a bro from dying if kept in inventory, giving them half HP
+}
+
+RevivingMushroom2: {
+	DisplayName: 1UP Deluxe
+	Tooltip: Prevents a bro from dying if kept in inventory, giving them full HP
+}
+
+StarCandy1: {
+	DisplayName: Star Candy
+	Tooltip: ""
+}
+
+StarCandy2: {
+	DisplayName: Super Star Candy
+	Tooltip: ""
+}
+
+StarCandy3: {
+	DisplayName: Ultra Star Candy
+	Tooltip: ""
+}
+
+StarCandy4: {
+	DisplayName: Max Star Candy
+	Tooltip: ""
+}
+
+SyrupJar1: {
+	DisplayName: Syrup Jar
+	Tooltip: ""
+}
+
+SyrupJar2: {
+	DisplayName: Super Syrup Jar
+	Tooltip: ""
+}
+
+SyrupJar3: {
+	DisplayName: Ultra Syrup Jar
+	Tooltip: ""
+}
+
+SyrupJar4: {
+	DisplayName: Max Syrup Jar
+	Tooltip: ""
+}
+
+FamilyPhoto: {
+	DisplayName: Family Photo
+	Tooltip:
+		'''
+		'S. Dominick'
+		Adapted by M. Lob
+		'''
+}
+
+GarlicPower: {
+	DisplayName: Garlic Power
+	Tooltip:
+		'''
+		'S. Dominick'
+		Adapted by M. Lob
+		'''
+}
+
+LuigiStatue: {
+	DisplayName: Luigi Statue
+	Tooltip: Some say there are voices trapped within these stones
+}
+
+Madpax: {
+	DisplayName: Madpax
+	Tooltip:
+		'''
+		'S. Dominick'
+		Adapted by M. Lob
+		'''
+}
+
+MarioStatue: {
+	DisplayName: Mario Statue
+	Tooltip: Some say there are voices trapped within these stones
+}
+
+MischievousActivities: {
+	DisplayName: Mischievous Activities
+	Tooltip:
+		'''
+		'S. Dominick'
+		Adapted by M. Lob
+		'''
+}
+
+Talluigi: {
+	DisplayName: Talluigi
+	Tooltip:
+		'''
+		'S. Dominick'
+		Adapted by M. Lob
+		'''
+}
+
+Nut1: {
+	DisplayName: Nut
+	Tooltip: Restores HP of you and nearby teammates
+}
+
+Nut2: {
+	DisplayName: Super Nut
+	Tooltip: Restores HP of you and nearby teammates
+}
+
+Nut3: {
+	DisplayName: Ultra Nut
+	Tooltip: Restores HP of you and nearby teammates
+}
+
+Nut4: {
+	DisplayName: Max Nut
+	Tooltip: Restores HP of you and nearby teammates
+}
+
+BeanDefense: {
+	DisplayName: Tough Bean
+	Tooltip: Permanently increases defense
+}
+
+BeanDefenseDown: {
+	DisplayName: Brittle Bean
+	Tooltip: Permanently decreases defense
+}
+
+BeanHP: {
+	DisplayName: Healthy Bean
+	Tooltip: Permanently increases life
+}
+
+BeanHPDown: {
+	DisplayName: Sickly Bean
+	Tooltip: Permanently decreases life
+}
+
+BeanPow: {
+	DisplayName: Strong Bean
+	Tooltip: Permanently increases Pow
+}
+
+BeanPowDown: {
+	DisplayName: Weak Bean
+	Tooltip: Permanently decreases Pow
+}
+
+BeanSP: {
+	DisplayName: Special Bean
+	Tooltip: Permanently increases SP
+}
+
+BeanSPDown: {
+	DisplayName: Ordinary Bean
+	Tooltip: Permanently decreases SP
+}
+
+BooBiscuit: {
+	DisplayName: Boo Biscuit
+	Tooltip: Turns you invisible for a short time
+}
+
+BoomerangFlowerItem: {
+	DisplayName: Reserved Boomerang Flower
+	Tooltip: Summons a Boomerang Flower
+}
+
+FireFlowerItem: {
+	DisplayName: Reserved Fire Flower
+	Tooltip: Summons a Fire Flower
+}
+
+FireFlower: {
+	DisplayName: Fire Flower
+	Tooltip: ""
+}
+
+FrogSuitItem: {
+	DisplayName: Reserved Frog Suit
+	Tooltip: Summons a Frog Suit
+}
+
+FrogSuit: {
+	DisplayName: Frog Suit
+	Tooltip: ""
+}
+
+HammerSuitItem: {
+	DisplayName: Reserved Hammer Suit
+	Tooltip: Summons a Hammer Suit
+}
+
+IceFlowerItem: {
+	DisplayName: Reserved Ice Flower
+	Tooltip: Summons an Ice Flower
+}
+
+IceFlower: {
+	DisplayName: Ice Flower
+	Tooltip: ""
+}
+
+SuperLeafItem: {
+	DisplayName: Reserved Super Leaf
+	Tooltip: Summons a Super Leaf
+}
+
+TanookiSuitItem: {
+	DisplayName: Reserved Tanooki Suit
+	Tooltip: Summons a Tanooki Suit
+}
+
+TanookiSuit: {
+	DisplayName: Tanooki Suit
+	Tooltip: ""
+}
+
+ThinWear: {
+	DisplayName: Thin Wear
+	Tooltip: ""
+}
+
+AOKWear: {
+	DisplayName: A-OK Wear
+	Tooltip: ""
+}
+
+BalmWear: {
+	DisplayName: Balm Wear
+	Tooltip: ""
+}
+
+BrawnyWear: {
+	DisplayName: Brawny Wear
+	Tooltip: ""
+}
+
+DStarWear: {
+	DisplayName: D-Star Wear
+	Tooltip: ""
+}
+
+FighterWear: {
+	DisplayName: Fighter Wear
+	Tooltip: ""
+}
+
+GrownUpWear: {
+	DisplayName: Grown-Up Wear
+	Tooltip: ""
+}
+
+HeartWear: {
+	DisplayName: Heart Wear
+	Tooltip: ""
+}
+
+HeroWear: {
+	DisplayName: Hero Wear
+	Tooltip: ""
+}
+
+KingWear: {
+	DisplayName: King Wear
+	Tooltip: ""
+}
+
+KoopaWear: {
+	DisplayName: Koopa Wear
+	Tooltip: ""
+}
+
+LeisureWear: {
+	DisplayName: Leisure Wear
+	Tooltip: ""
+}
+
+MasterWear: {
+	DisplayName: Master Wear
+	Tooltip: ""
+}
+
+MuscleWear: {
+	DisplayName: Muscle Wear
+	Tooltip: ""
+}
+
+PicnicWear: {
+	DisplayName: Picnic Wear
+	Tooltip: ""
+}
+
+StarWear: {
+	DisplayName: Star Wear
+	Tooltip: ""
+}
+
+RootBean: {
+	DisplayName: Root Bean
+	Tooltip: ""
+}
+
+BlueShellItem: {
+	DisplayName: Reserved Blue Shell
+	Tooltip: Summons a Blue Shell
+}
+
+PowerStar: {
+	DisplayName: Power Star
+	Tooltip: ""
+}

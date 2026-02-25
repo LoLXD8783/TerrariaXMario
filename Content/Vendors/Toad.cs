@@ -15,7 +15,6 @@ using TerrariaXMario.Common.CapEffects;
 using TerrariaXMario.Common.Emotes;
 using TerrariaXMario.Content.Overalls;
 using TerrariaXMario.Utilities.Extensions;
-using static AssGen.Assets;
 
 namespace TerrariaXMario.Content.Vendors;
 
@@ -27,7 +26,7 @@ internal class Toad : ModNPC
     private static int ShimmerHeadIndex;
     private static Profiles.StackedNPCProfile? NPCProfile;
 
-    private string[] gearTypes = [.. Enum.GetNames(typeof(GearType)).Where(e => e != "None" && e != "Cap")];
+    private readonly string[] gearTypes = [.. Enum.GetNames(typeof(GearType)).Where(e => e != "None" && e != "Cap")];
 
     public override void Load()
     {
@@ -64,10 +63,10 @@ internal class Toad : ModNPC
             .SetNPCAffection(NPCID.WitchDoctor, AffectionLevel.Hate)
         ;
 
-        //NPCProfile = new Profiles.StackedNPCProfile(
-        //    new Profiles.DefaultNPCProfile(Texture, NPCHeadLoader.GetHeadSlot(HeadTexture), Texture + "_Party"),
-        //    new Profiles.DefaultNPCProfile(Texture + "_Shimmer", ShimmerHeadIndex, Texture + "_Shimmer_Party")
-        //);
+        NPCProfile = new Profiles.StackedNPCProfile(
+            new Profiles.DefaultNPCProfile(Texture, NPCHeadLoader.GetHeadSlot(HeadTexture))
+        //new Profiles.DefaultNPCProfile(Texture + "_Shimmer", ShimmerHeadIndex, Texture + "_Shimmer_Party")
+        );
 
         ContentSamples.NpcBestiaryRarityStars[Type] = 1;
     }
@@ -113,6 +112,8 @@ internal class Toad : ModNPC
                 "Mint T.",
                 "Taste T.",
                 "Tayce T.",
+                "Juniper",
+                "Keegan"
             ];
     }
 

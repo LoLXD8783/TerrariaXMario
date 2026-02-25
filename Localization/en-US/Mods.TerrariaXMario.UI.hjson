@@ -1,0 +1,22 @@
+CapSelect: {
+	Mario: Mario has an all-around balanced moveset.
+	Luigi: Luigi jumps higher and moves faster, but is slightly more difficult to control.
+}
+
+GearType: {
+	Cap: Cap
+	Overalls: Overalls
+	Socks: Socks
+	Boots: Boots
+	Gloves: Gloves
+	Badge: Badge
+}
+
+BroInfoUI: {
+	PageButton: Bro Gear
+	Pow: Power
+}
+
+HealSPTooltip: Restores {0} SP
+UseSPTooltip: Uses {0} SP
+CycleShop: Cycle shop
