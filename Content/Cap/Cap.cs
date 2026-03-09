@@ -1,0 +1,176 @@
+﻿using Terraria.Audio;
+using Terraria.DataStructures;
+using Terraria.GameInput;
+using Terraria.ID;
+using Terraria.Utilities;
+
+namespace TerrariaXMario.Content.Cap;
+
+internal abstract class CapItem : ModItem
+{
+    public override void Load()
+    {
+        if (Main.netMode == NetmodeID.Server) return;
+
+        EquipSet.Default.AddEquipTextures(this);
+        EquipSet.GroundPound.AddEquipTextures(this);
+        EquipSet.Flying.AddEquipTextures(this);
+    }
+
+    public override void SetStaticDefaults()
+    {
+        TerrariaXMarioItemSets.GearAccessoryItem[Type] = true;
+
+        if (Main.netMode == NetmodeID.Server) return;
+
+        EquipSet.Default.SetupEquipTextures(this);
+        EquipSet.GroundPound.SetupEquipTextures(this);
+        EquipSet.Flying.SetupEquipTextures(this);
+    }
+
+    public override void SetDefaults()
+    {
+        Item.width = 32;
+        Item.height = 20;
+        Item.accessory = true;
+    }
+
+    public override bool? PrefixChance(int pre, UnifiedRandom rand) => !(pre == -1 || pre == -3);
+
+    public override bool CanEquipAccessory(Player player, int slot, bool modded) => modded;
+
+    public override void UpdateAccessory(Player player, bool hideVisual)
+    {
+        player.CapPlayer.currentCap = Name;
+    }
+
+    public override void UpdateVisibleAccessory(Player player, bool hideVisual)
+    {
+        player.CapPlayer.currentCap = Name;
+    }
+}
+
+[CanBeReadBySourceGenerators]
+internal partial class CapPlayer : ModPlayer
+{
+    [NetSync] internal string oldCap = "";
+    [NetSync] internal string currentCap = "";
+    [NetSync] internal string currentVariation = "";
+
+    internal bool Enabled => currentCap != "";
+
+    internal static void PlaySound(Player player, string sound, float volume = 1, float pitch = 0)
+    {
+        SoundEngine.PlaySound($"Content/Cap/{sound}", player.MountedCenter, volume, pitch);
+    }
+
+    internal static void PlayCapSound(Player player, string cap, string sound, float volume = 1, float pitch = 0)
+    {
+        SoundEngine.PlaySound($"Content/{cap}/{cap}{sound}", player.MountedCenter, volume, pitch);
+    }
+
+    internal void PlayCapSound(string sound, float volume = 1, float pitch = 0)
+    {
+        SoundEngine.PlaySound($"Content/{currentCap}/{currentCap}{sound}", Player.MountedCenter, volume, pitch);
+    }
+
+    internal static void ResetVariation(Player player)
+    {
+        player.CapPlayer.currentVariation = EquipSet.Default.Name;
+    }
+
+    public override void ResetEffects()
+    {
+        currentCap = "";
+    }
+
+    public override void ModifyDrawInfo(ref PlayerDrawSet drawInfo)
+    {
+        Player player = drawInfo.drawPlayer;
+
+        if (!player.CapPlayer.Enabled) return;
+
+        if (player.CapPlayer.currentVariation != EquipSet.Flying.Name && !player.IsOnGroundPrecise && ((player.legFrame.Y / player.legFrame.Height) is 10 or 11 or 12 or 13 or 17 or 18 or 19 or 20)) player.legPosition.Y = player.gravDir == 1 ? -2 : 8;
+    }
+
+    public override void FrameEffects()
+    {
+        if (!Enabled) return;
+
+        foreach (EquipType equipType in Enum.GetValues(typeof(EquipType)))
+        {
+            int equipSlot = EquipSet.GetEquipSlot(currentCap, currentVariation, equipType);
+            if (equipSlot == -1) equipSlot = EquipSet.GetEquipSlot(currentCap, "", equipType);
+
+            switch (equipType)
+            {
+                case EquipType.Head:
+                    Player.head = equipSlot;
+                    break;
+                case EquipType.Body:
+                    Player.body = equipSlot;
+                    break;
+                case EquipType.Legs:
+                    Player.legs = equipSlot;
+                    break;
+                case EquipType.HandsOn:
+                    Player.handon = equipSlot;
+                    break;
+                case EquipType.HandsOff:
+                    Player.handoff = equipSlot;
+                    break;
+                case EquipType.Back:
+                    Player.back = equipSlot;
+                    break;
+                case EquipType.Front:
+                    Player.front = equipSlot;
+                    break;
+                case EquipType.Shoes:
+                    Player.shoe = equipSlot;
+                    break;
+                case EquipType.Waist:
+                    Player.waist = equipSlot;
+                    break;
+                case EquipType.Wings:
+                    Player.wings = equipSlot;
+                    break;
+                case EquipType.Shield:
+                    Player.shield = equipSlot;
+                    break;
+                case EquipType.Neck:
+                    Player.neck = equipSlot;
+                    break;
+                case EquipType.Face:
+                    Player.face = equipSlot;
+                    break;
+                case EquipType.Balloon:
+                    Player.balloon = equipSlot;
+                    break;
+                case EquipType.Beard:
+                    Player.beard = equipSlot;
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public override void PostUpdateEquips()
+    {
+        if (oldCap != currentCap) PlayCapSound(Player, currentCap == "" ? oldCap : currentCap, $"{(currentCap == "" ? "Une" : "E")}quip");
+        oldCap = currentCap;
+    }
+
+    public override void ModifyHurt(ref Player.HurtModifiers modifiers)
+    {
+        if (!Enabled) return;
+
+        modifiers.DisableSound();
+        PlayCapSound($"Hurt{Main.rand.Next(1, 5)}");
+    }
+
+    public override void ProcessTriggers(TriggersSet triggersSet)
+    {
+        if (PlayerInput.Triggers.JustPressed.Jump && (Player.IsOnGroundPrecise || Player.wet)) PlaySound(Player, Player.wet ? "Swim" : "Jump");
+    }
+}

@@ -1,31 +1,37 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
+	<!-- Import Shader compiler
 	<Import Project=".\Core\Effects\Compiler\KBOFXCTask.props" />
-	<Import Project=".\Core\Effects\Compiler\KBOFXCTask.targets" />
+	<Import Project=".\Core\Effects\Compiler\KBOFXCTask.targets" /> -->
 
 	<!-- General -->
 	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
+	<ItemGroup>
+		<AdditionalFiles Remove="obj\**" />
+		<AdditionalFiles Remove="TerrariaXMario.SourceGenerators\**" />
+		<Compile Remove="obj\**" />
+		<Compile Remove="TerrariaXMario.SourceGenerators\**" />
+		<EmbeddedResource Remove="obj\**" />
+		<EmbeddedResource Remove="TerrariaXMario.SourceGenerators\**" />
+		<None Remove="obj\**" />
+		<None Remove="TerrariaXMario.SourceGenerators\**" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Remove=".editorconfig" />
+		<None Remove=".gitattributes" />
+		<None Remove=".gitignore" />
+		<None Remove="debug.log" />
+	</ItemGroup>
 
 	<!-- References -->
-
-	<PropertyGroup>
-		<DefineConstants>$(DefineConstants);BUILDINGFROMCSPROJ_MOD</DefineConstants>
-		<OutputType>Exe</OutputType>
-		<LangVersion>preview</LangVersion>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
-
-	<Target Name="CreateTMLPathTxt" AfterTargets="AfterBuild">
-		<WriteLinesToFile File="$(OutDir)tmlpath.txt" Lines="$(TerrariaSteamPath)$(tMLPath)" />
-	</Target>
-
 	<ItemGroup>
 		<Reference Include="StructureHelper">
-		  <HintPath>lib\StructureHelper.dll</HintPath>
+			<HintPath>lib\StructureHelper.dll</HintPath>
 		</Reference>
 		<Reference Include="SubworldLibrary">
 			<HintPath>lib\SubworldLibrary.dll</HintPath>
@@ -39,8 +45,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Localization\es-ES\" />
-	  <Folder Include="Localization\ru-RU\" />
+		<ProjectReference Include="TerrariaXMario.SourceGenerators\TerrariaXMario.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Using Include="TerrariaXMario.Utilities.Extensions" />
+		<Using Include="Terraria" />
+		<Using Include="Terraria.ModLoader" />
+		<Using Include="Microsoft.Xna.Framework" />
+	</ItemGroup>
 </Project>

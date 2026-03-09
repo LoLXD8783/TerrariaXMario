@@ -1,121 +1,31 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using ReLogic.Content;
-using System;
-using System.Collections.Generic;
-using Terraria;
-using Terraria.DataStructures;
-using Terraria.GameContent;
 using Terraria.ID;
-using Terraria.ModLoader;
-using Terraria.ObjectData;
-using TerrariaXMario.Content.Blocks;
 
 namespace TerrariaXMario;
 
-internal class TerrariaXMario : Mod
+/// <summary>
+/// Indicates that a class can be read and processed by <c>TerrariaXMario.SourceGenerators</c>
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+internal class CanBeReadBySourceGeneratorsAttribute : Attribute;
+
+/// <summary>
+/// Indicates that a field can be read and processed by <c>TerrariaXMario.SourceGenerators.NetSyncGenerator</c>
+/// </summary>
+[AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
+internal class NetSyncAttribute : Attribute
+{
+    public bool ShouldSave { get; set; }
+}
+
+internal partial class TerrariaXMario : Mod
 {
     internal static TerrariaXMario Instance => ModContent.GetInstance<TerrariaXMario>();
+}
 
-    internal static string Textures => $"{nameof(TerrariaXMario)}/Assets/Textures";
-    internal static string Sounds => $"{nameof(TerrariaXMario)}/Assets/Sounds";
-    internal static string BrickBlockTile => $"{nameof(TerrariaXMario)}/Content/Blocks/BrickBlockTile";
-    internal static string QuestionBlockTile => $"{nameof(TerrariaXMario)}/Content/Blocks/QuestionBlockTile";
-
-    private Asset<Texture2D>? oldMushroomTexture;
-    private Asset<Texture2D>[]? oldCursors;
-    internal int CursorGrabIndex = -1;
-    internal int CursorThrowIndex = -1;
-
-    internal static ObjectSpawnerBlockEntity? GetTileEntityOrNull(int i, int j) => TileEntity.TryGet(new(i, j), out ModTileEntity entity) ? entity as ObjectSpawnerBlockEntity : null;
-    internal static ObjectSpawnerBlockEntity? GetTileEntityOrNull(Vector2 coords) => TileEntity.TryGet(new((int)coords.X, (int)coords.Y), out ModTileEntity entity) ? entity as ObjectSpawnerBlockEntity : null;
-    internal static ObjectSpawnerBlockEntity? GetTileEntityOrNull(Point coords) => TileEntity.TryGet(new(coords.X, coords.Y), out ModTileEntity entity) ? entity as ObjectSpawnerBlockEntity : null;
-
-    internal static Dictionary<string, Color> capColors = new() {
-        { "Mario", new Color(217, 22, 22) },
-        { "Luigi", new Color(27, 149, 4) }
-    };
-
-    internal static Vector2 BroInfoPageButtonPosition;
-
-    internal static string ResourceBarStyle => Main.ResourceSetsManager.ActiveSet.DisplayedName;
-
-    public override void Load()
-    {
-        oldMushroomTexture = TextureAssets.Item[ItemID.Mushroom];
-        TextureAssets.Item[ItemID.Mushroom] = ModContent.Request<Texture2D>($"{nameof(TerrariaXMario)}/Content/Consumables/EdibleMushroom1");
-
-        oldCursors = [.. TextureAssets.Cursors];
-        TextureAssets.Cursors = [.. TextureAssets.Cursors, ModContent.Request<Texture2D>($"{Textures}/CursorGrab")];
-        CursorGrabIndex = TextureAssets.Cursors.Length - 1;
-        TextureAssets.Cursors = [.. TextureAssets.Cursors, ModContent.Request<Texture2D>($"{Textures}/CursorThrow")];
-        CursorThrowIndex = TextureAssets.Cursors.Length - 1;
-    }
-
-    public override void Unload()
-    {
-        TextureAssets.Item[ItemID.Mushroom] = oldMushroomTexture;
-        oldMushroomTexture = null;
-        TextureAssets.Cursors = oldCursors;
-        oldCursors = null;
-        CursorGrabIndex = -1;
-        CursorThrowIndex = -1;
-    }
-
-    internal static bool SolidTile(int i, int j)
-    {
-        return WorldGen.InWorld(i, j) && SolidTile(Main.tile[i, j]);
-    }
-
-    internal static bool SolidTile(Tile t)
-    {
-        if (!t.HasTile || t.IsActuated)
-        {
-            return false;
-        }
-
-        return Main.tileSolid[t.TileType] && !Main.tileSolidTop[t.TileType];
-    }
-
-    internal static bool SolidOrSolidTopTile(int i, int j)
-    {
-        return WorldGen.InWorld(i, j) && SolidOrSolidTopTile(Main.tile[i, j]);
-    }
-
-    internal static bool SolidOrSolidTopTile(Tile t)
-    {
-        if (!t.HasTile || t.IsActuated)
-        {
-            return false;
-        }
-
-        return Main.tileSolid[t.TileType] || Main.tileSolidTop[t.TileType];
-    }
-
-    internal static Vector2 CenterOfMultitileInWorld(Point point)
-    {
-        Tile tile = Framing.GetTileSafely(point.X, point.Y);
-        TileObjectData data = TileObjectData.GetTileData(tile);
-        return TileObjectData.TopLeft(point.X, point.Y).ToWorldCoordinates() + new Vector2(data.Width, data.Height) * 4;
-    }
-
-    internal static Vector2 GetInitialProjectileVelocity(Player player, float gravity)
-    {
-        Vector2 start = player.MountedCenter;
-        Vector2 apex = Main.MouseWorld;
-
-        float dy = start.Y - apex.Y;
-        if (dy <= 0)
-        {
-            Vector2 speed = (apex - start).SafeNormalize(Vector2.Zero) * (apex.Distance(start) * 0.05f);
-            return new(MathHelper.Clamp(speed.X, -12, 12), MathHelper.Clamp(speed.Y, -12, 12));
-        }
-
-        float vy = (float)Math.Sqrt(2f * gravity * dy);
-        float t = vy / gravity;
-        float vx = (apex.X - start.X) / t;
-
-
-        return new(MathHelper.Clamp(vx, -8, 8), -vy);
-    }
+[ReinitializeDuringResizeArrays]
+internal static class TerrariaXMarioItemSets
+{
+    public static bool[] GearAccessoryItem = ItemID.Sets.Factory.CreateNamedSet("GearAccessoryItem")
+        .Description("If the item is a gear accessory item.")
+        .RegisterBoolSet(false);
 }

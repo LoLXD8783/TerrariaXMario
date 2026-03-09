@@ -1,14 +1,9 @@
-﻿using Terraria;
-using Terraria.ModLoader;
+﻿namespace TerrariaXMario.Utilities.Extensions;
 
-namespace TerrariaXMario.Utilities.Extensions;
-
-internal static class PlayerExtensions
+internal static partial class PlayerExtensions
 {
-    public static T? GetModPlayerOrNull<T>(this Player player) where T : ModPlayer => player.TryGetModPlayer(out T result) ? result : null;
-
-    public static bool IsOnGroundPrecise(this Player player)
+    extension(Player player)
     {
-        return player.velocity.Y == 0 && (Collision.SolidCollision(player.BottomLeft, player.width, 1, true) || Collision.WaterCollision(player.BottomLeft, player.velocity, player.width, 1, lavaWalk: player.waterWalk2).Y == 0);
+        internal bool IsOnGroundPrecise => player.velocity.Y == 0 && (Collision.SolidCollision(player.BottomLeft, player.width, 1, true) || Collision.WaterCollision(player.BottomLeft, player.velocity, player.width, 1, lavaWalk: player.waterWalk2).Y == 0);
     }
 }
