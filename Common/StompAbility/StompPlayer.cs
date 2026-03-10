@@ -1,4 +1,4 @@
-﻿using TerrariaXMario.Content.Cap;
+﻿using TerrariaXMario.Utilities.Assets;
 
 namespace TerrariaXMario.Common.StompAbility;
 
@@ -37,12 +37,12 @@ internal partial class StompPlayer : ModPlayer
                 if (!Player.GroundPoundPlayer.IsGroundPounding)
                 {
                     Player.velocity.Y = (Player.jumpSpeed + Player.jumpSpeedBoost) * -Player.gravDir * (Player.controlJump ? 2 : 1.5f);
-                    CapPlayer.PlaySound(Player, "Stomp", pitch: Math.Clamp(stompCount, 0, 6) * 0.165f);
+                    Assets.Stomp.Play(Player.MountedCenter, pitch: Math.Clamp(stompCount, 0, 6) * 0.165f);
 
                     if (stompCount > 6)
                     {
                         Player.Heal(1);
-                        CapPlayer.PlaySound(Player, "Heal");
+                        Assets.Heal.Play(Player.MountedCenter);
                     }
 
                     if (Player.LeanJumpPlayer.Enabled()) Player.LeanJumpPlayer.angle *= -1;

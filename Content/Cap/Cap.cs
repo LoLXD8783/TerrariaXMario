@@ -3,6 +3,7 @@ using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Utilities;
+using TerrariaXMario.Utilities.Assets;
 
 namespace TerrariaXMario.Content.Cap;
 
@@ -59,20 +60,8 @@ internal partial class CapPlayer : ModPlayer
 
     internal bool Enabled => currentCap != "";
 
-    internal static void PlaySound(Player player, string sound, float volume = 1, float pitch = 0)
-    {
-        SoundEngine.PlaySound($"Content/Cap/{sound}", player.MountedCenter, volume, pitch);
-    }
-
-    internal static void PlayCapSound(Player player, string cap, string sound, float volume = 1, float pitch = 0)
-    {
-        SoundEngine.PlaySound($"Content/{cap}/{cap}{sound}", player.MountedCenter, volume, pitch);
-    }
-
-    internal void PlayCapSound(string sound, float volume = 1, float pitch = 0)
-    {
-        SoundEngine.PlaySound($"Content/{currentCap}/{currentCap}{sound}", Player.MountedCenter, volume, pitch);
-    }
+    internal static CapAudioData CapAudio(string cap) => Assets.CapAudio[cap];
+    internal CapAudioData CurrentCapAudio => Assets.CapAudio[currentCap];
 
     internal static void ResetVariation(Player player)
     {
@@ -157,7 +146,12 @@ internal partial class CapPlayer : ModPlayer
 
     public override void PostUpdateEquips()
     {
-        if (oldCap != currentCap) PlayCapSound(Player, currentCap == "" ? oldCap : currentCap, $"{(currentCap == "" ? "Une" : "E")}quip");
+        if (oldCap != currentCap)
+        {
+            if (currentCap == "") CapAudio(currentCap == "" ? oldCap : currentCap).Unequip.PlayRandom(Player.MountedCenter);
+            else CurrentCapAudio.Equip.PlayRandom(Player.MountedCenter);
+        }
+
         oldCap = currentCap;
     }
 
@@ -166,11 +160,15 @@ internal partial class CapPlayer : ModPlayer
         if (!Enabled) return;
 
         modifiers.DisableSound();
-        PlayCapSound($"Hurt{Main.rand.Next(1, 5)}");
+        CurrentCapAudio.Hurt.PlayRandom(Player.MountedCenter);
     }
 
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
-        if (PlayerInput.Triggers.JustPressed.Jump && (Player.IsOnGroundPrecise || Player.wet)) PlaySound(Player, Player.wet ? "Swim" : "Jump");
+        if (PlayerInput.Triggers.JustPressed.Jump && (Player.IsOnGroundPrecise || Player.wet))
+        {
+            if (Player.wet) Assets.Swim.Play(Player.MountedCenter);
+            else Assets.Jump.Play(Player.MountedCenter);
+        }
     }
 }

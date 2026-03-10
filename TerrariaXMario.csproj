@@ -54,4 +54,9 @@
 		<Using Include="Terraria.ModLoader" />
 		<Using Include="Microsoft.Xna.Framework" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<AdditionalFiles Include="**\*.png" />
+		<AdditionalFiles Include="**\*.wav" />
+	</ItemGroup>
 </Project>

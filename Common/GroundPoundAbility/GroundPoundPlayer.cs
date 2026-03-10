@@ -3,6 +3,7 @@ using Terraria.GameInput;
 using TerrariaXMario.Common.CameraEffects;
 using TerrariaXMario.Common.StompAbility;
 using TerrariaXMario.Content.Cap;
+using TerrariaXMario.Utilities.Assets;
 
 namespace TerrariaXMario.Common.GroundPoundAbility;
 
@@ -20,7 +21,7 @@ internal partial class GroundPoundPlayer : ModPlayer
         {
             Player.CapPlayer.currentVariation = EquipSet.GroundPound.Name;
             //Player.JumpVariationPlayer.flipDuration = 12;
-            CapPlayer.PlaySound(Player, "GroundPoundStart");
+            Assets.GroundPoundStart.Play(Player.MountedCenter);
         }
     }
 
@@ -57,7 +58,7 @@ internal partial class GroundPoundPlayer : ModPlayer
         {
             if (Player.IsOnGroundPrecise) // Player hits the ground during ground pound
             {
-                CapPlayer.PlaySound(Player, "GroundPound");
+                Assets.GroundPound.Play(Player.MountedCenter);
                 CameraModifier.DoScreenShake(Player);
                 StompImpactDust.Spawn(Player, 4, 1.5f, -1, -0.5f);
             }
