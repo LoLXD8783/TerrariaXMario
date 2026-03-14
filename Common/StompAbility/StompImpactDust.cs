@@ -2,7 +2,7 @@
 
 internal class StompImpactDust : ModDust
 {
-    int timeLeft = 0;
+    private int timeLeft = 0;
     public override void OnSpawn(Dust dust)
     {
         timeLeft = 45;

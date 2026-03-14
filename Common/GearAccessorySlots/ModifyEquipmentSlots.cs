@@ -90,7 +90,7 @@ internal class ModifyEquipmentSlots : ILoadable
         c.EmitLdloc((byte)12);
         c.EmitDelegate((Rectangle rectangle2) =>
         {
-            GearLoadoutButtonSystem.GearLoadoutButtonPosition = rectangle2.Center.ToVector2();
+            GearLoadoutButton.ButtonPosition = rectangle2.Center.ToVector2();
         });
         c.EmitBr(loopLabel);
         c.MarkLabel(label);

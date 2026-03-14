@@ -1,5 +1,4 @@
-﻿using Terraria.Audio;
-using Terraria.DataStructures;
+﻿using Terraria.DataStructures;
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Utilities;
@@ -40,23 +39,40 @@ internal abstract class CapItem : ModItem
 
     public override bool CanEquipAccessory(Player player, int slot, bool modded) => modded;
 
-    public override void UpdateAccessory(Player player, bool hideVisual)
+    internal void Update(Player player)
     {
         player.CapPlayer.currentCap = Name;
+
+        if (!player.GroundPoundPlayer.IsGroundPounding)
+        {
+            player.spikedBoots = 1;
+            player.accFlipper = true;
+        }
+    }
+
+    public override void UpdateAccessory(Player player, bool hideVisual)
+    {
+        Update(player);
     }
 
     public override void UpdateVisibleAccessory(Player player, bool hideVisual)
     {
-        player.CapPlayer.currentCap = Name;
+        Update(player);
     }
 }
 
 [CanBeReadBySourceGenerators]
 internal partial class CapPlayer : ModPlayer
 {
+    internal static Dictionary<string, Color> CapColors = new() {
+        { "Mario", new Color(217, 22, 22) },
+        { "Luigi", new Color(27, 149, 4) }
+    };
+
     [NetSync] internal string oldCap = "";
     [NetSync] internal string currentCap = "";
     [NetSync] internal string currentVariation = "";
+    internal Color? CurrentCapColor => currentCap == "" ? null : CapColors[currentCap];
 
     internal bool Enabled => currentCap != "";
 
@@ -165,7 +181,9 @@ internal partial class CapPlayer : ModPlayer
 
     public override void ProcessTriggers(TriggersSet triggersSet)
     {
-        if (PlayerInput.Triggers.JustPressed.Jump && (Player.IsOnGroundPrecise || Player.wet))
+        if (!Enabled) return;
+
+        if (PlayerInput.Triggers.JustPressed.Jump && !Player.mount.Active && (Player.IsOnGroundPrecise || Player.wet))
         {
             if (Player.wet) Assets.Swim.Play(Player.MountedCenter);
             else Assets.Jump.Play(Player.MountedCenter);

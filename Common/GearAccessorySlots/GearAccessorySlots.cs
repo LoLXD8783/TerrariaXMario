@@ -22,6 +22,8 @@ internal abstract class GearAccessorySlot<T> : ModAccessorySlot where T : ModIte
 
     public override bool CanAcceptItem(Item checkItem, AccessorySlotType context) => checkItem.ModItem is T && context == AccessorySlotType.FunctionalSlot;
 
+    public override string FunctionalBackgroundTexture => Assets.GearAccessorySlotBack.Path;
+
     public override bool DrawDyeSlot => typeof(CapItem) is T;
 
     public override bool DrawVanitySlot => false;
@@ -38,6 +40,11 @@ internal abstract class GearAccessorySlot<T> : ModAccessorySlot where T : ModIte
     {
         if (context == AccessorySlotType.DyeSlot) base.OnMouseHover(context);
         else Main.hoverItemName = Language.GetValue($"UI.GearAccessorySlots.{TypeName}");
+    }
+
+    public override void BackgroundDrawColor(AccessorySlotType context, ref Color color)
+    {
+        color = Player.CapPlayer.CurrentCapColor * 0.5f ?? new(100, 82, 60);
     }
 }
 
