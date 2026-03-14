@@ -8,7 +8,15 @@ namespace TerrariaXMario.Common.PMeter;
 [CanBeReadBySourceGenerators]
 internal class PMeter : BetterUIState
 {
-    internal override bool Visible => Player.CapPlayer.Enabled;
+    internal override bool Visible
+    {
+        get
+        {
+            bool result = Player.CapPlayer.Enabled;
+            if (!result) opacity = 0;
+            return result;
+        }
+    }
     internal override InterfaceScaleType InterfaceScaleType => InterfaceScaleType.Game;
 
     private readonly int count = 5;

@@ -113,8 +113,8 @@ internal class ModifyEquipmentSlots : ILoadable
         c.EmitDelegate(Main.LocalPlayer.CanDemonHeartAccessoryBeShown);
         c.EmitDelegate(Main.LocalPlayer.CanMasterModeAccessoryBeShown);
         c.EmitCall(typeof(Main).GetMethod("DrawLoadoutButtons", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!);
-        c.EmitDelegate(() => Main.screenWidth - 36);
-        c.EmitDelegate(() => AccessorySlotLoader.DrawVerticalAlignment + 336 * Main.inventoryScale + 4f);
+        c.EmitDelegate(() => Main.screenWidth + 1);
+        c.EmitDelegate(() => AccessorySlotLoader.DrawVerticalAlignment + 164 * Main.inventoryScale + 4f);
         c.EmitConvI4();
         c.EmitCall(typeof(Main).GetMethod("DrawDefenseCounter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!);
         c.EmitBr(label);
