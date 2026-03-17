@@ -2,7 +2,7 @@
 using Terraria.Audio;
 using Terraria.Graphics.Shaders;
 using Terraria.ID;
-using TerrariaXMario.Utilities.Assets;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Common.PMeter;
 
@@ -30,7 +30,7 @@ internal partial class PMeterPlayer : ModPlayer
         if (!self.CapPlayer.Enabled) orig(self);
     }
 
-    internal void DoFastRunEffects() // ripped from Player.SpawnFastRunParticles
+    internal void DoFastRunEffects()
     {
         if (!fastRun)
         {
@@ -46,6 +46,7 @@ internal partial class PMeterPlayer : ModPlayer
 
         if (!Player.IsOnGroundPrecise) return;
 
+        // ripped from Player.SpawnFastRunParticles
         if (Player.runSoundDelay == 0)
         {
             SoundEngine.PlaySound(Player.hermesStepSound.Style, Player.position);

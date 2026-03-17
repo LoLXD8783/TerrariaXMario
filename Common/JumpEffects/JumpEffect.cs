@@ -34,7 +34,7 @@ internal partial class JumpEffectPlayer : ModPlayer
 
         if (!player.JumpEffectPlayer.Enabled)
         {
-            Reset(player);
+            Reset(player, true);
             return;
         }
 

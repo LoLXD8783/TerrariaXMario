@@ -1,7 +1,7 @@
 ﻿using Terraria.Localization;
 using Terraria.UI;
 using TerrariaXMario.Common.UIElements;
-using TerrariaXMario.Utilities.Assets;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Common.GearLoadout;
 

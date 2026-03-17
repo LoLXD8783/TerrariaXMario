@@ -2,7 +2,7 @@
 using Terraria.GameInput;
 using Terraria.ID;
 using Terraria.Utilities;
-using TerrariaXMario.Utilities.Assets;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Content.Cap;
 

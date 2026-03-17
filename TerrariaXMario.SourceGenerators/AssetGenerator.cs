@@ -19,7 +19,9 @@ public sealed class AssetGenerator : IIncrementalGenerator
     {
         var collectedAssets = context.AdditionalTextsProvider.Where(file =>
                 file.Path.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
-                file.Path.EndsWith(".wav", StringComparison.OrdinalIgnoreCase))
+                file.Path.EndsWith(".wav", StringComparison.OrdinalIgnoreCase) ||
+                file.Path.EndsWith(".xnb", StringComparison.OrdinalIgnoreCase) ||
+                file.Path.EndsWith(".fxc", StringComparison.OrdinalIgnoreCase))
             .Select((file, cancellationToken) => file.Path).Collect();
 
         context.RegisterSourceOutput(collectedAssets, (sourceProductionContext, assets) =>
@@ -27,7 +29,9 @@ public sealed class AssetGenerator : IIncrementalGenerator
             StringBuilder text = new(2048);
             using IndentedTextWriter writer = new(new StringWriter(text));
 
-            writer.WriteLine("namespace TerrariaXMario.Utilities.Assets;");
+            writer.WriteLine("using ReLogic.Graphics;");
+            writer.WriteLine("using Microsoft.Xna.Framework.Graphics;");
+            writer.WriteLine("namespace TerrariaXMario.Utilities.AssetData;");
             writer.WriteLine("internal static class Assets");
             writer.WriteLine("{");
             writer.Indent++;
@@ -54,6 +58,8 @@ public sealed class AssetGenerator : IIncrementalGenerator
                     {
                         "png" => "Image",
                         "wav" => "Audio",
+                        "xnb" => "Font",
+                        "fxc" => "Effect",
                         _ => "None"
                     };
 
@@ -92,12 +98,15 @@ public sealed class AssetGenerator : IIncrementalGenerator
             writer.Indent--;
             writer.WriteLine("};");
 
+
             foreach (string asset in assets.Where(i => !isCapAsset(i)))
             {
                 string type = asset.Split('.').Last() switch
                 {
                     "png" => "Image",
                     "wav" => "Audio",
+                    "xnb" => "Font",
+                    "fxc" => "Effect",
                     _ => "None"
                 };
 
@@ -111,6 +120,22 @@ public sealed class AssetGenerator : IIncrementalGenerator
                 writer.WriteLine($"internal static {type}Data {directories.Last()} = new(\"{path}\");");
             }
 
+            writer.Indent--;
+            writer.WriteLine("}");
+            writer.WriteLine("internal class AssetLoader : ModSystem");
+            writer.WriteLine("{");
+            writer.Indent++;
+            writer.WriteLine("public override void Load()");
+            writer.WriteLine("{");
+            writer.Indent++;
+
+            foreach (string asset in assets.Where(i => i.Split('.').Last() == "xnb"))
+            {
+                writer.WriteLine($"ModContent.Request<DynamicSpriteFont>(Assets.{asset.Split('.').First().Split('\\').Last()}.Path);");
+            }
+
+            writer.Indent--;
+            writer.WriteLine("}");
             writer.Indent--;
             writer.WriteLine("}");
 

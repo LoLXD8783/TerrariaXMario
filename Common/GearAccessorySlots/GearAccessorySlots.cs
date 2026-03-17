@@ -1,7 +1,7 @@
 ﻿using Terraria.Localization;
 using TerrariaXMario.Common.GearLoadout;
 using TerrariaXMario.Content.Cap;
-using TerrariaXMario.Utilities.Assets;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Common.GearAccessorySlots;
 

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework.Graphics;
 using Terraria.UI;
 using TerrariaXMario.Common.UIElements;
-using TerrariaXMario.Utilities.Assets;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Common.PMeter;
 

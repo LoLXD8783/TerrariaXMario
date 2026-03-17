@@ -6,11 +6,11 @@ using TerrariaXMario.Common.GearLoadout;
 
 namespace TerrariaXMario.Common.GearAccessorySlots;
 
-internal class ModifyEquipmentSlots : ILoadable
+internal class ModifyEquipmentSlots : ModSystem
 {
     private static bool Enabled(Player player) => player.TryGetModPlayer(out GearLoadoutPlayer modPlayer) && player.CurrentLoadoutIndex == modPlayer.gearLoadoutIndex;
 
-    void ILoadable.Load(Mod mod)
+    public override void Load()
     {
         // All of these modify armor and accessory slots in some way when gear loadout is selected
 
@@ -30,8 +30,6 @@ internal class ModifyEquipmentSlots : ILoadable
         // Removes all other accessory slots
         MonoModHooks.Add(typeof(AccessorySlotLoader).GetMethod("Draw"), DetourDraw);
     }
-
-    void ILoadable.Unload() { }
 
     private Item DetourArmorSwap(On_ItemSlot.orig_ArmorSwap orig, Item item, out bool success)
     {

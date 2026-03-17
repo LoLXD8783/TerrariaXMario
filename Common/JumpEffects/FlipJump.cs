@@ -22,13 +22,8 @@ internal partial class FlipJumpPlayer : JumpEffectPlayer
     internal override bool CanUpdate()
     {
         bool canDoGroundPoundFlip = Player.GroundPoundPlayer.IsGroundPounding && CommonCondition(Player, true);
-        bool result = canDoGroundPoundFlip;
-
-        if (!result)
-        {
-            FlipCount = 0;
-            Timer = 0;
-        }
+        bool canDoStompFlip = Player.StompPlayer.stompCount % 7 == 0 && Player.StompPlayer.stompCount != 0 && CommonCondition(Player);
+        bool result = canDoGroundPoundFlip || canDoStompFlip;
 
         return result;
     }
