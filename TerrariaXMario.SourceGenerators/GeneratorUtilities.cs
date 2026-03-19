@@ -2,15 +2,8 @@
 
 namespace TerrariaXMario.SourceGenerators;
 
-enum ContainerType
-{
-    None,
-    ModPlayer,
-    JumpVariationPlayer,
-}
-
 internal record struct ClassInfo(string Namespace, string Name);
-internal record struct FieldInfo(string Name, string Type, ClassInfo Container, ContainerType ContainerType, params object[] ExtraData);
+internal record struct FieldInfo(string Name, string Type, ClassInfo Container, params object[] ExtraData);
 
 internal static class GeneratorHelper
 {

@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
-	<!-- Import Shader compiler
+	<!-- Import Shader compiler -->
 	<Import Project=".\Core\Effects\Compiler\KBOFXCTask.props" />
-	<Import Project=".\Core\Effects\Compiler\KBOFXCTask.targets" /> -->
+	<Import Project=".\Core\Effects\Compiler\KBOFXCTask.targets" />
 
 	<!-- General -->
 	<PropertyGroup>
@@ -74,4 +74,11 @@
 	  <None Include="Core\DebugStartup\FastLaunch.SinglePlayer\FastLaunch.SinglePlayer.csproj.user" />
 	</ItemGroup>
 
+
+	<ItemGroup>
+		<AdditionalFiles Include="**\*.png" />
+		<AdditionalFiles Include="**\*.wav" />
+		<AdditionalFiles Include="**\*.xnb" />
+		<AdditionalFiles Include="**\*.fxc" />
+	</ItemGroup>
 </Project>

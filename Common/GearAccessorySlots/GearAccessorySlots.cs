@@ -1,6 +1,7 @@
 ﻿using Terraria.Localization;
 using TerrariaXMario.Common.GearLoadout;
 using TerrariaXMario.Content.Cap;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Common.GearAccessorySlots;
 
@@ -21,11 +22,11 @@ internal abstract class GearAccessorySlot<T> : ModAccessorySlot where T : ModIte
 
     public override bool CanAcceptItem(Item checkItem, AccessorySlotType context) => checkItem.ModItem is T && context == AccessorySlotType.FunctionalSlot;
 
+    public override string FunctionalBackgroundTexture => Assets.GearAccessorySlotBack.Path;
+
     public override bool DrawDyeSlot => typeof(CapItem) is T;
 
     public override bool DrawVanitySlot => false;
-
-    public override string FunctionalTexture => GetType().NamespaceAsPath.JoinForPath(TypeName);
 
     public override bool IsEnabled() => Player.TryGetModPlayer(out GearLoadoutPlayer player) && player.Enabled;
 
@@ -40,34 +41,45 @@ internal abstract class GearAccessorySlot<T> : ModAccessorySlot where T : ModIte
         if (context == AccessorySlotType.DyeSlot) base.OnMouseHover(context);
         else Main.hoverItemName = Language.GetValue($"UI.GearAccessorySlots.{TypeName}");
     }
+
+    public override void BackgroundDrawColor(AccessorySlotType context, ref Color color)
+    {
+        color = Player.CapPlayer.CurrentCapColor * 0.5f ?? new(100, 82, 60);
+    }
 }
 
 internal class CapSlot : GearAccessorySlot<CapItem>
 {
     public override Vector2? CustomLocation => GetCustomLocation();
+    public override string FunctionalTexture => Assets.CapItem.Path;
 }
 
 internal class OverallsSlot : GearAccessorySlot<CapItem>
 {
     public override Vector2? CustomLocation => GetCustomLocation(slotOffsetY: 1);
+    public override string FunctionalTexture => Assets.OverallsItem.Path;
 }
 
 internal class GlovesSlot : GearAccessorySlot<CapItem>
 {
     public override Vector2? CustomLocation => GetCustomLocation(-1, 1);
+    public override string FunctionalTexture => Assets.GlovesItem.Path;
 }
 
 internal class SocksSlot : GearAccessorySlot<CapItem>
 {
     public override Vector2? CustomLocation => GetCustomLocation(-1, 2);
+    public override string FunctionalTexture => Assets.SocksItem.Path;
 }
 
 internal class BootsSlot : GearAccessorySlot<CapItem>
 {
     public override Vector2? CustomLocation => GetCustomLocation(slotOffsetY: 2);
+    public override string FunctionalTexture => Assets.BootsItem.Path;
 }
 
 internal class AccessorySlot : GearAccessorySlot<CapItem>
 {
     public override Vector2? CustomLocation => GetCustomLocation(slotOffsetY: 3);
+    public override string FunctionalTexture => Assets.AccessoryItem.Path;
 }

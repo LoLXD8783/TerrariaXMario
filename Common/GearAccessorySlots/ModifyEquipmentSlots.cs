@@ -6,11 +6,11 @@ using TerrariaXMario.Common.GearLoadout;
 
 namespace TerrariaXMario.Common.GearAccessorySlots;
 
-internal class ModifyEquipmentSlots : ILoadable
+internal class ModifyEquipmentSlots : ModSystem
 {
     private static bool Enabled(Player player) => player.TryGetModPlayer(out GearLoadoutPlayer modPlayer) && player.CurrentLoadoutIndex == modPlayer.gearLoadoutIndex;
 
-    void ILoadable.Load(Mod mod)
+    public override void Load()
     {
         // All of these modify armor and accessory slots in some way when gear loadout is selected
 
@@ -30,8 +30,6 @@ internal class ModifyEquipmentSlots : ILoadable
         // Removes all other accessory slots
         MonoModHooks.Add(typeof(AccessorySlotLoader).GetMethod("Draw"), DetourDraw);
     }
-
-    void ILoadable.Unload() { }
 
     private Item DetourArmorSwap(On_ItemSlot.orig_ArmorSwap orig, Item item, out bool success)
     {
@@ -90,7 +88,7 @@ internal class ModifyEquipmentSlots : ILoadable
         c.EmitLdloc((byte)12);
         c.EmitDelegate((Rectangle rectangle2) =>
         {
-            GearLoadoutButtonSystem.GearLoadoutButtonPosition = rectangle2.Center.ToVector2();
+            GearLoadoutButton.ButtonPosition = rectangle2.Center.ToVector2();
         });
         c.EmitBr(loopLabel);
         c.MarkLabel(label);
@@ -113,8 +111,8 @@ internal class ModifyEquipmentSlots : ILoadable
         c.EmitDelegate(Main.LocalPlayer.CanDemonHeartAccessoryBeShown);
         c.EmitDelegate(Main.LocalPlayer.CanMasterModeAccessoryBeShown);
         c.EmitCall(typeof(Main).GetMethod("DrawLoadoutButtons", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!);
-        c.EmitDelegate(() => Main.screenWidth - 36);
-        c.EmitDelegate(() => AccessorySlotLoader.DrawVerticalAlignment + 336 * Main.inventoryScale + 4f);
+        c.EmitDelegate(() => Main.screenWidth + 1);
+        c.EmitDelegate(() => AccessorySlotLoader.DrawVerticalAlignment + 164 * Main.inventoryScale + 4f);
         c.EmitConvI4();
         c.EmitCall(typeof(Main).GetMethod("DrawDefenseCounter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!);
         c.EmitBr(label);

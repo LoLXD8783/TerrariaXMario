@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.CodeDom.Compiler;
@@ -27,10 +26,7 @@ public sealed class NetSyncGenerator : IIncrementalGenerator
             transform: (context, cancellationToken) =>
             {
                 ISymbol symbol = context.TargetSymbol;
-                ContainerType containerType = ContainerType.None;
-
-                if (GeneratorHelper.IsAssignableTo(symbol.ContainingType, "Terraria.ModLoader.ModPlayer", false)) containerType = ContainerType.ModPlayer;
-                if (GeneratorHelper.IsAssignableTo(symbol.ContainingType, "TerrariaXMario.Common.JumpVariations.JumpVariationPlayer", false)) containerType = ContainerType.JumpVariationPlayer;
+                INamedTypeSymbol container = symbol.ContainingType;
 
                 ITypeSymbol type = symbol switch
                 {
@@ -41,8 +37,6 @@ public sealed class NetSyncGenerator : IIncrementalGenerator
                 };
 
                 string typeName = type?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "unknown";
-
-                INamedTypeSymbol container = symbol.ContainingType;
 
                 bool shouldSave = false;
 
@@ -57,7 +51,7 @@ public sealed class NetSyncGenerator : IIncrementalGenerator
                     }
                 }
 
-                return new FieldInfo(symbol.Name.ToString(), typeName, new ClassInfo(container.ContainingNamespace.ToString(), container.Name.ToString()), containerType, shouldSave);
+                return new FieldInfo(symbol.Name.ToString(), typeName, new ClassInfo(container.ContainingNamespace.ToString(), container.Name.ToString()), shouldSave);
             }).Collect();
 
         context.RegisterSourceOutput(collectedFieldInfos, (sourceProductionContext, fieldInfos) =>
@@ -100,14 +94,9 @@ public sealed class NetSyncGenerator : IIncrementalGenerator
                 writer.WriteLine($"case NetMessageType.{container}Sync:");
                 writer.WriteLine("{");
                 writer.Indent++;
-
-                if (fieldInfos.First(e => e.Container.Name == container).ContainerType == ContainerType.ModPlayer)
-                {
-                    writer.WriteLine("Player player = Main.player[reader.ReadByte()];");
-                    writer.WriteLine($"player.{container}.ReceivePlayerSync(reader);");
-                    writer.WriteLine($"if (Main.netMode == NetmodeID.Server) player.{container}.SyncPlayer(-1, whoAmI, false);");
-                }
-
+                writer.WriteLine("Player player = Main.player[reader.ReadByte()];");
+                writer.WriteLine($"player.{container}.ReceivePlayerSync(reader);");
+                writer.WriteLine($"if (Main.netMode == NetmodeID.Server) player.{container}.SyncPlayer(-1, whoAmI, false);");
                 writer.WriteLine("break;");
                 writer.Indent--;
                 writer.WriteLine("}");
@@ -129,84 +118,80 @@ public sealed class NetSyncGenerator : IIncrementalGenerator
             foreach (ClassInfo container in containers)
             {
                 string containerName = container.Name;
-                ContainerType containerType = fieldInfos.First(e => e.Container.Name == containerName).ContainerType;
                 FieldInfo[] fields = [.. fieldInfos.Where(e => e.Container.Name == containerName)];
                 string[] fieldNames = [.. fields.Select(e => e.Name)];
 
                 writer.WriteLine($"namespace {container.Namespace}");
                 writer.WriteLine("{");
                 writer.Indent++;
-                writer.WriteLine($"internal partial class {containerName} : {containerType}");
+                writer.WriteLine($"internal partial class {containerName}");
                 writer.WriteLine("{");
                 writer.Indent++;
 
-                if (containerType == ContainerType.ModPlayer)
+
+                writer.WriteLine("public override void SyncPlayer(int toWho, int fromWho, bool newPlayer)");
+                writer.WriteLine("{");
+                writer.Indent++;
+                writer.WriteLine("ModPacket packet = Mod.GetPacket();");
+                writer.WriteLine($"packet.Write((byte)TerrariaXMario.NetMessageType.{containerName}Sync);");
+                writer.WriteLine("packet.Write((byte)Player.whoAmI);");
+
+                foreach (FieldInfo field in fields)
                 {
-                    writer.WriteLine("public override void SyncPlayer(int toWho, int fromWho, bool newPlayer)");
-                    writer.WriteLine("{");
-                    writer.Indent++;
-                    writer.WriteLine("ModPacket packet = Mod.GetPacket();");
-                    writer.WriteLine($"packet.Write((byte)TerrariaXMario.NetMessageType.{containerName}Sync);");
-                    writer.WriteLine("packet.Write((byte)Player.whoAmI);");
-
-                    foreach (string field in fieldNames)
-                    {
-                        writer.WriteLine($"packet.Write({field});");
-                    }
-
-                    writer.WriteLine("packet.Send(toWho, fromWho);");
-                    writer.Indent--;
-                    writer.WriteLine("}");
-                    writer.WriteLine("internal void ReceivePlayerSync(BinaryReader reader)");
-                    writer.WriteLine("{");
-                    writer.Indent++;
-
-                    foreach (FieldInfo field in fields)
-                    {
-                        string readName = field.Type switch
-                        {
-                            "string" => "String",
-                            "bool" => "Boolean",
-                            "int" => "Int32",
-                            "uint" => "UInt32",
-                            "float" => "Single",
-                            "byte" => "Byte",
-                            "sbyte" => "Byte",
-                            _ => throw new Exception($"Bad field type {field.Name} {field.Type} {field.Container.Name} {field.Container.Namespace} {field.ContainerType}")
-                        };
-
-                        writer.WriteLine($"{field.Name} = reader.Read{readName}();");
-                    }
-
-                    writer.Indent--;
-                    writer.WriteLine("}");
-                    writer.WriteLine("public override void CopyClientState(ModPlayer targetCopy)");
-                    writer.WriteLine("{");
-                    writer.Indent++;
-                    writer.WriteLine($"{containerName} clone = ({containerName})targetCopy;");
-
-                    foreach (string field in fieldNames)
-                    {
-                        writer.WriteLine($"clone.{field} = {field};");
-                    }
-
-                    writer.Indent--;
-                    writer.WriteLine("}");
-                    writer.WriteLine("public override void SendClientChanges(ModPlayer clientPlayer)");
-                    writer.WriteLine("{");
-                    writer.Indent++;
-                    writer.WriteLine($"{containerName} clone = ({containerName})clientPlayer;");
-                    writer.WriteLine("if (");
-
-                    foreach (string field in fieldNames)
-                    {
-                        writer.WriteLine($"clone.{field} != {field} {(field == fieldNames.Last() ? "" : "||")}");
-                    }
-
-                    writer.WriteLine(") SyncPlayer(toWho: -1, fromWho: Main.myPlayer, newPlayer: false);");
-                    writer.Indent--;
-                    writer.WriteLine("}");
+                    if (field.Type == "global::Microsoft.Xna.Framework.Vector2") writer.WriteLine($"packet.WriteVector2({field.Name});");
+                    else writer.WriteLine($"packet.Write({field.Name});");
                 }
+
+                writer.WriteLine("packet.Send(toWho, fromWho);");
+                writer.Indent--;
+                writer.WriteLine("}");
+                writer.WriteLine("internal void ReceivePlayerSync(BinaryReader reader)");
+                writer.WriteLine("{");
+                writer.Indent++;
+
+                foreach (FieldInfo field in fields)
+                {
+                    string readName = field.Type.Replace("global::", "") switch
+                    {
+                        "string" => "String",
+                        "bool" => "Boolean",
+                        "int" => "Int32",
+                        "float" => "Single",
+                        "Microsoft.Xna.Framework.Vector2" => "Vector2",
+                        _ => throw new Exception($"Bad field type {field.Name} {field.Type} {field.Container.Name} {field.Container.Namespace}")
+                    };
+
+                    writer.WriteLine($"{field.Name} = reader.Read{readName}();");
+                }
+
+                writer.Indent--;
+                writer.WriteLine("}");
+                writer.WriteLine("public override void CopyClientState(ModPlayer targetCopy)");
+                writer.WriteLine("{");
+                writer.Indent++;
+                writer.WriteLine($"{containerName} clone = ({containerName})targetCopy;");
+
+                foreach (string field in fieldNames)
+                {
+                    writer.WriteLine($"clone.{field} = {field};");
+                }
+
+                writer.Indent--;
+                writer.WriteLine("}");
+                writer.WriteLine("public override void SendClientChanges(ModPlayer clientPlayer)");
+                writer.WriteLine("{");
+                writer.Indent++;
+                writer.WriteLine($"{containerName} clone = ({containerName})clientPlayer;");
+                writer.WriteLine("if (");
+
+                foreach (string field in fieldNames)
+                {
+                    writer.WriteLine($"clone.{field} != {field} {(field == fieldNames.Last() ? "" : "||")}");
+                }
+
+                writer.WriteLine(") SyncPlayer(toWho: -1, fromWho: Main.myPlayer, newPlayer: false);");
+                writer.Indent--;
+                writer.WriteLine("}");
 
                 if (fields.Any(e => (bool)e.ExtraData[0]))
                 {
@@ -234,11 +219,7 @@ public sealed class NetSyncGenerator : IIncrementalGenerator
                             "string" => "String",
                             "bool" => "Bool",
                             "int" => "Int",
-                            "uint" => "Int",
-                            "float" => "Float",
-                            "byte" => "Byte",
-                            "sbyte" => "Byte",
-                            _ => throw new Exception($"Bad field type {fieldThatNeedsSaving.Name} {fieldThatNeedsSaving.Type} {fieldThatNeedsSaving.Container.Name} {fieldThatNeedsSaving.Container.Namespace} {fieldThatNeedsSaving.ContainerType}")
+                            _ => throw new Exception($"Bad field type {fieldThatNeedsSaving.Name} {fieldThatNeedsSaving.Type} {fieldThatNeedsSaving.Container.Name} {fieldThatNeedsSaving.Container.Namespace}")
                         };
 
                         writer.WriteLine($"if (tag.ContainsKey(nameof({fieldThatNeedsSaving.Name}))) {fieldThatNeedsSaving.Name} = tag.Get{readName}(nameof({fieldThatNeedsSaving.Name}));");

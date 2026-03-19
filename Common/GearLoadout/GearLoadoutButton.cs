@@ -1,80 +1,48 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using Terraria.Localization;
+﻿using Terraria.Localization;
 using Terraria.UI;
 using TerrariaXMario.Common.UIElements;
+using TerrariaXMario.Utilities.AssetData;
 
 namespace TerrariaXMario.Common.GearLoadout;
 
-[Autoload(Side = ModSide.Client)]
-internal class GearLoadoutButtonSystem : ModSystem
+[CanBeReadBySourceGenerators]
+internal class GearLoadoutButton : BetterUIState
 {
-    internal static Vector2 GearLoadoutButtonPosition = -Main.ScreenSize.ToVector2();
+    internal static Vector2 ButtonPosition = -Main.ScreenSize.ToVector2();
 
-    private UserInterface? GearLoadoutButtonUserInterface;
-    private GearLoadoutButtonState? GearLoadoutButtonState;
+    internal override bool Visible => Main.playerInventory;
 
-    public override void Load()
-    {
-        GearLoadoutButtonState = new();
-        GearLoadoutButtonUserInterface = new();
-        GearLoadoutButtonUserInterface.SetState(GearLoadoutButtonState);
-    }
+    private static bool LoadoutEnabled => Player.GearLoadoutPlayer.Enabled;
 
-    public override void UpdateUI(GameTime gameTime)
-    {
-        GearLoadoutButtonUserInterface?.Update(gameTime);
-    }
-
-    public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
-    {
-        int index = layers.FindIndex(layer => layer.Name.Equals("Vanilla: Mouse Text"));
-
-        if (index == -1) return;
-
-        layers.Insert(index, new LegacyGameInterfaceLayer($"{nameof(TerrariaXMario)}: Gear Loadout Button", () =>
-        {
-            if (Main.playerInventory) GearLoadoutButtonUserInterface?.Draw(Main.spriteBatch, new());
-            return true;
-        }, InterfaceScaleType.UI));
-    }
-}
-
-internal class GearLoadoutButtonState : UIState
-{
-    private string TexturePath => GetType().NamespaceAsPath.JoinForPath("GearLoadoutButton");
-    private UIHoverImageButton? GearLoadoutButton { get; set; }
+    private UIHoverImageButton? Button { get; set; }
 
     public override void OnInitialize()
     {
-        GearLoadoutButton = this.AddElement(new UIHoverImageButton(ModContent.Request<Texture2D>(TexturePath), Language.Get($"UI.GearLoadoutButton")).With(e =>
+        Button = this.AddElement(new UIHoverImageButton(Assets.GearLoadoutButton.Get, Language.Get($"UI.GearLoadoutButton")).With(e =>
         {
-            e.Left = StyleDimension.FromPixels(GearLoadoutButtonSystem.GearLoadoutButtonPosition.X - 20);
-            e.Top = StyleDimension.FromPixels(GearLoadoutButtonSystem.GearLoadoutButtonPosition.Y - 16);
+            e.Left = StyleDimension.FromPixels(ButtonPosition.X - 20);
+            e.Top = StyleDimension.FromPixels(ButtonPosition.Y - 16);
             e.Width = StyleDimension.FromPixels(32);
             e.Height = StyleDimension.FromPixels(32);
             e.SetVisibility(1, 1);
-            e.SetHoverImage(ModContent.Request<Texture2D>(TexturePath + "Hover"));
+            e.SetHoverImage(Assets.GearLoadoutButtonHover.Get);
             e.OnLeftClick += GearLoadoutButtonClick;
         }));
     }
 
     private void GearLoadoutButtonClick(UIMouseEvent evt, UIElement listeningElement)
     {
-        Player player = Main.LocalPlayer;
-        player.TrySwitchingLoadout(player.GearLoadoutPlayer.gearLoadoutIndex);
+        Player.TrySwitchingLoadout(Player.GearLoadoutPlayer.gearLoadoutIndex);
     }
 
     public override void Update(GameTime gameTime)
     {
-        base.Update(gameTime);
+        Button?.SetImage((LoadoutEnabled ? Assets.GearLoadoutButtonActive : Assets.GearLoadoutButton).Get);
+        Button?.SetHoverImage((LoadoutEnabled ? Assets.GearLoadoutButtonActiveHover : Assets.GearLoadoutButtonHover).Get);
 
-        string path = $"{TexturePath}{(Main.LocalPlayer.GearLoadoutPlayer.Enabled ? "Active" : "")}";
-        GearLoadoutButton?.SetImage(ModContent.Request<Texture2D>(path));
-        GearLoadoutButton?.SetHoverImage(ModContent.Request<Texture2D>($"{path}Hover"));
+        Button?.Left = StyleDimension.FromPixels(ButtonPosition.X - 18);
+        Button?.Top = StyleDimension.FromPixels(ButtonPosition.Y - 18);
 
-        GearLoadoutButton?.Left = StyleDimension.FromPixels(GearLoadoutButtonSystem.GearLoadoutButtonPosition.X - 18);
-        GearLoadoutButton?.Top = StyleDimension.FromPixels(GearLoadoutButtonSystem.GearLoadoutButtonPosition.Y - 18);
-
-        if (GearLoadoutButton?.IsMouseHovering ?? false) Main.LocalPlayer.mouseInterface = true;
+        if (Button?.IsMouseHovering ?? false) Player.mouseInterface = true;
     }
 }

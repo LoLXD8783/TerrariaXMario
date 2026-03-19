@@ -18,19 +18,19 @@ namespace TerrariaXMario.SourceGenerators;
 [Generator(LanguageNames.CSharp)]
 public sealed class ModPlayerShorthandExtensionGenerator : IIncrementalGenerator
 {
-    // Used to store required type information
-    private record struct ClassInfo(string Namespace, string Name);
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Stores names and namespaces of all classes that have the TerrariaXMario.CanBeReadBySourceGenerators attribute
-        IncrementalValueProvider<ImmutableArray<ClassInfo>> collectedPlayerInfos = context.SyntaxProvider.ForAttributeWithMetadataName("TerrariaXMario.CanBeReadBySourceGeneratorsAttribute",
-            predicate: (node, cancelToken) => node is ClassDeclarationSyntax,
-            transform: (context, cancellationToken) =>
-            {
-                ISymbol symbol = context.TargetSymbol;
-                return new ClassInfo(symbol.ContainingNamespace.ToString(), symbol.Name.ToString());
-            }).Collect();
+        IncrementalValueProvider<ImmutableArray<ClassInfo>> collectedPlayerInfos =
+            context.SyntaxProvider.ForAttributeWithMetadataName(
+                "TerrariaXMario.CanBeReadBySourceGeneratorsAttribute",
+                predicate: (node, _) => node is ClassDeclarationSyntax,
+                transform: (ctx, _) =>
+                {
+                    INamedTypeSymbol type = ctx.TargetSymbol as INamedTypeSymbol;
+
+                    return GeneratorHelper.IsAssignableTo(type, "Terraria.ModLoader.ModPlayer", false) ? new ClassInfo(type.ContainingNamespace.ToString(), type.Name) : new ClassInfo("", "");
+                }).Where(i => i.Name != "" && i.Namespace != "").Collect();
 
         context.RegisterSourceOutput(collectedPlayerInfos, (sourceProductionContext, playerInfos) =>
         {
