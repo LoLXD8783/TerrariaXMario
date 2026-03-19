@@ -3,3 +3,4 @@ author = Lacroix
 version = 2026.1.0.0
 dllReferences = KBOFXCTask, StructureHelper, Daybreak
 homepage = https://github.com/justreq/TerrariaXMario/blob/master/README.md
+buildIgnore = Core/DebugStartup/*

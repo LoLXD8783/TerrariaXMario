@@ -1,0 +1,82 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+
+		<UseCommonOutputDirectory>false</UseCommonOutputDirectory>
+		<OutputTmlReferences>true</OutputTmlReferences>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Publicize Include="tModLoader.dll;tModLoader" />
+		<PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+
+	<!-- ************* FastLaunch ************* -->
+	<ItemGroup Condition="'$(tMLSteamPath)' != ''">
+		<!--<TModInstallFilesToCopy Include="$(tMLSteamPath)/**/*.dll"/>
+		<TModInstallFilesToCopy Include="$(tMLSteamPath)/**/*.json"/>
+		<TModInstallContent Include="$(tMLSteamPath)/Content/**/*"/>-->
+		<!--<None Include="@(TModInstallFilesToCopy)">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>-->
+	</ItemGroup>
+
+	<!--<Target Name="CopyTMLInstall" AfterTargets="AfterBuild" Condition="'$(tMLSteamPath)' != ''">
+		<Copy SourceFiles="@(TModInstallContent)"
+			  DestinationFiles="@(TModInstallContent->'$(OutDir)Content/%(RecursiveDir)%(FileName)%(Extension)')"
+			  SkipUnchangedFiles="true"
+			  UseHardlinksIfPossible="true"/>
+		
+		<Copy SourceFiles="@(TModInstallFilesToCopy)"
+			  DestinationFiles="@(TModInstallFilesToCopy->'$(OutDir)%(RecursiveDir)%(FileName)%(Extension)')"
+			  SkipUnchangedFiles="true"
+			  Retries="0"
+			  ContinueOnError="true"/>
+	</Target>-->
+		
+	<Target Name="CreateTMLPathTxt" AfterTargets="AfterBuild">
+		<WriteLinesToFile File="$(OutDir)tmlpath.txt" Lines="$(TerrariaSteamPath)$(tMLPath)" Overwrite="true" WriteOnlyWhenDifferent="true" />
+		<!--<WriteLinesToFile File="$(OutDir)tmlpath.txt" Lines="$(OutDir)$(tMLPath)" Overwrite="true" WriteOnlyWhenDifferent="true" />-->
+	</Target>
+
+	<ItemGroup>
+		<!--<Reference Update="$(tMLLibraryPath)/steamworks.net.anycpu/**/*.dll" Private="true"/>
+		<Reference Update="Steamworks.NET.dll" Private="true"/>-->
+		<!--<Reference Condition="$([System.OperatingSystem]::IsWindows())" Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\win\lib\net8.0\Steamworks.NET.dll"/>
+		<Reference Condition="$([System.OperatingSystem]::IsLinux())" Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\linux\lib\net8.0\Steamworks.NET.dll"/>
+		-->
+		<None Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\**/*" Link="runtimes/%(RecursiveDir)%(FileName)%(Extension)" >
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</None>
+
+		<None Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\win\lib\net8.0\Steamworks.NET.dll" >
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</None>
+
+		<None Condition="$([System.OperatingSystem]::IsWindows())" Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\win-x64\native\steam_api64.dll" >
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</None>
+
+		<None Condition="$([System.OperatingSystem]::IsWindows())" Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\win-x86\native\steam_api.dll" >
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</None>
+
+		<None Condition="$([System.OperatingSystem]::IsLinux())" Include="$(tMLLibraryPath)/steamworks.net.anycpu\2025.162.4\runtimes\linux-x64\native\libsteam_api.so" >
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</None>
+
+		<None Condition="$([System.OperatingSystem]::IsMacOS())" Include="$(tMLLibraryPath)\steamworks.net.anycpu\2025.162.4\runtimes\osx\native\libsteam_api.dylib" >
+			<CopyToOutputDirectory>IfDifferent</CopyToOutputDirectory>
+		</None>
+		
+	</ItemGroup>
+
+</Project>

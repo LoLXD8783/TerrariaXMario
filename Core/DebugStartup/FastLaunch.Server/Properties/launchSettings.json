@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "AADBGWorld": {
+      "commandName": "Project",
+      "commandLineArgs": "-kboserverworld AADBGWORLD"
+    },
+    "Default": {
+      "commandName": "Project"
+    }
+  }
+}

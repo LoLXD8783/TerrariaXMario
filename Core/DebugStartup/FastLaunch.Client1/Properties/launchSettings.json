@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "AADBGPlayer1 (localhost)": {
+      "commandName": "Project",
+      "commandLineArgs": "-join 127.0.0.1 -plr AADBGPLAYER1"
+    },
+    "Default": {
+      "commandName": "Project"
+    }
+  }
+}

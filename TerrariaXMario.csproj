@@ -12,13 +12,13 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<AdditionalFiles Remove="obj\**" />
+		<AdditionalFiles Remove="artifacts\**" />
 		<AdditionalFiles Remove="TerrariaXMario.SourceGenerators\**" />
-		<Compile Remove="obj\**" />
+		<Compile Remove="artifacts\**" />
 		<Compile Remove="TerrariaXMario.SourceGenerators\**" />
-		<EmbeddedResource Remove="obj\**" />
+		<EmbeddedResource Remove="artifacts\**" />
 		<EmbeddedResource Remove="TerrariaXMario.SourceGenerators\**" />
-		<None Remove="obj\**" />
+		<None Remove="artifacts\**" />
 		<None Remove="TerrariaXMario.SourceGenerators\**" />
 	</ItemGroup>
 	<ItemGroup>
@@ -54,4 +54,24 @@
 		<Using Include="Terraria.ModLoader" />
 		<Using Include="Microsoft.Xna.Framework" />
 	</ItemGroup>
+
+
+	<!-- Fast startup -->
+	<ItemGroup>
+		<!--<None Remove="Core\DebugStartup\**" />-->
+		<Compile Remove="Core\DebugStartup\**" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Include="Core\DebugStartup\FastLaunch.Client1\FastLaunch.Client1.csproj" />
+	  <None Include="Core\DebugStartup\FastLaunch.Client1\FastLaunch.Client1.csproj.user" />
+	  <None Include="Core\DebugStartup\FastLaunch.Client2\FastLaunch.Client2.csproj" />
+	  <None Include="Core\DebugStartup\FastLaunch.Client2\FastLaunch.Client2.csproj.user" />
+	  <None Include="Core\DebugStartup\FastLaunch.Common\FastLaunch.Common.csproj" />
+	  <None Include="Core\DebugStartup\FastLaunch.Server\FastLaunch.Server.csproj" />
+	  <None Include="Core\DebugStartup\FastLaunch.Server\FastLaunch.Server.csproj.user" />
+	  <None Include="Core\DebugStartup\FastLaunch.SinglePlayer\FastLaunch.SinglePlayer.csproj" />
+	  <None Include="Core\DebugStartup\FastLaunch.SinglePlayer\FastLaunch.SinglePlayer.csproj.user" />
+	</ItemGroup>
+
 </Project>

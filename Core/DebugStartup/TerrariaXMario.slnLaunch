@@ -1,0 +1,42 @@
+[
+  {
+    "Name": "Multiplayer (SkipSelect)",
+    "Projects": [
+      {
+        "Path": "FastLaunch.Client1\\FastLaunch.Client1.csproj",
+        "Action": "Start",
+        "DebugTarget": "AADBGPlayer1 (localhost)"
+      },
+      {
+        "Path": "FastLaunch.Client2\\FastLaunch.Client2.csproj",
+        "Action": "Start",
+        "DebugTarget": "AADBGPlayer2 (localhost)"
+      },
+      {
+        "Path": "FastLaunch.Server\\FastLaunch.Server.csproj",
+        "Action": "Start",
+        "DebugTarget": "AADBGWorld"
+      }
+    ]
+  },
+  {
+    "Name": "SinglePlayer",
+    "Projects": [
+      {
+        "Path": "FastLaunch.SinglePlayer\\FastLaunch.SinglePlayer.csproj",
+        "Action": "Start",
+        "DebugTarget": "Default"
+      }
+    ]
+  },
+  {
+    "Name": "SP (SkipSelect)",
+    "Projects": [
+      {
+        "Path": "FastLaunch.SinglePlayer\\FastLaunch.SinglePlayer.csproj",
+        "Action": "Start",
+        "DebugTarget": "SkipSelect"
+      }
+    ]
+  }
+]

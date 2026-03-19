@@ -1,0 +1,16 @@
+<Project>
+	<!-- 
+	The properties and settings on this file apply to the current mod and all subprojects. 
+	-->
+	<PropertyGroup>
+		<!--<Company></Company>-->
+		<RootModName>TerrariaXMario</RootModName>
+		<DefineConstants>$(DefineConstants);NO_INGAME_BUILD</DefineConstants>
+
+		<DebugStartupModRoot>$(MSBuildThisFileDirectory)</DebugStartupModRoot>
+		
+		<UseArtifactsOutput>true</UseArtifactsOutput>
+		<RootArtifactsPath>$(MSBuildThisFileDirectory)artifacts/</RootArtifactsPath>
+		<ArtifactsPath>$(RootArtifactsPath)</ArtifactsPath>
+	</PropertyGroup>
+</Project>

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "SkipSelect": {
+      "commandName": "Project",
+      "commandLineArgs": "-skipselect AADBGPLAYER:AADBGWORLD"
+    },
+    "Default": {
+      "commandName": "Project",
+      "commandLineArgs": ""
+    }
+  }
+}

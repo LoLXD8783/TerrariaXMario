@@ -1,0 +1,19 @@
+<Project>
+	<Import Project="..\..\Directory.Build.props" />
+
+	<PropertyGroup>
+		<UseArtifactsOutput>false</UseArtifactsOutput>
+		<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+		<ArtifactsPath>$(RootArtifactsPath)/bin/FastLaunch</ArtifactsPath>
+		<BaseIntermediateOutputPath>$(RootArtifactsPath)obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+		<BaseOutputPath>$(RootArtifactsPath)bin/FastLaunch</BaseOutputPath>
+		<ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+
+		<!-- Kept only as long as ALL the projects (including mod) target ONLY ONE framework (.net 8.0) -->
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<OutputTMLReferences>true</OutputTMLReferences>
+		<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+
+	</PropertyGroup>
+</Project>
